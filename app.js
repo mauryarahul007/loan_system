@@ -793,6 +793,44 @@ function convertToIndianWords(value) {
     return `${formatted} (${text} Rupees)`;
 }
 
+function formatInputElement(inputElement, labelElement) {
+    let rawValue = inputElement.value.replace(/,/g, '');
+    if (rawValue === '') {
+        inputElement.value = '';
+        if (labelElement) labelElement.textContent = '';
+        return;
+    }
+    
+    // Separate integer and decimal parts
+    let parts = rawValue.split('.');
+    let integerPart = parts[0].replace(/\D/g, ''); // keep only digits in integer
+    let decimalPart = parts.length > 1 ? '.' + parts[1].replace(/\D/g, '') : '';
+    
+    if (integerPart === '') {
+        inputElement.value = '';
+        if (labelElement) labelElement.textContent = '';
+        return;
+    }
+    
+    let parsedNum = parseInt(integerPart, 10);
+    let formattedInteger = new Intl.NumberFormat('en-IN').format(parsedNum);
+    
+    // Save cursor position
+    let cursorPosition = inputElement.selectionStart;
+    let originalLength = inputElement.value.length;
+    
+    inputElement.value = formattedInteger + decimalPart;
+    
+    // Adjust cursor position after inserting commas
+    let newLength = inputElement.value.length;
+    let positionChange = newLength - originalLength;
+    inputElement.setSelectionRange(cursorPosition + positionChange, cursorPosition + positionChange);
+    
+    if (labelElement) {
+        labelElement.textContent = convertToIndianWords(parseFloat(rawValue));
+    }
+}
+
 function initPayoffPlanner() {
     const nameInput = document.getElementById("payoff-loan-name");
     const balanceInput = document.getElementById("payoff-loan-balance");
@@ -809,26 +847,28 @@ function initPayoffPlanner() {
     const extraAnnualText = document.getElementById("payoff-extra-annual-text");
     
     // Bind dynamic input value formatting events
-    if (balanceInput && balanceText) {
+    if (balanceInput) {
         balanceInput.addEventListener("input", () => {
-            balanceText.textContent = convertToIndianWords(parseFloat(balanceInput.value));
+            formatInputElement(balanceInput, balanceText);
         });
     }
-    if (emiInput && emiText) {
+    if (emiInput) {
         emiInput.addEventListener("input", () => {
-            emiText.textContent = convertToIndianWords(parseFloat(emiInput.value));
+            formatInputElement(emiInput, emiText);
         });
     }
-    if (extraMonthlyInput && extraMonthlyText) {
-        extraMonthlyText.textContent = convertToIndianWords(parseFloat(extraMonthlyInput.value));
+    if (extraMonthlyInput) {
+        // Format on load
+        formatInputElement(extraMonthlyInput, extraMonthlyText);
         extraMonthlyInput.addEventListener("input", () => {
-            extraMonthlyText.textContent = convertToIndianWords(parseFloat(extraMonthlyInput.value));
+            formatInputElement(extraMonthlyInput, extraMonthlyText);
         });
     }
-    if (extraAnnualInput && extraAnnualText) {
-        extraAnnualText.textContent = convertToIndianWords(parseFloat(extraAnnualInput.value));
+    if (extraAnnualInput) {
+        // Format on load
+        formatInputElement(extraAnnualInput, extraAnnualText);
         extraAnnualInput.addEventListener("input", () => {
-            extraAnnualText.textContent = convertToIndianWords(parseFloat(extraAnnualInput.value));
+            formatInputElement(extraAnnualInput, extraAnnualText);
         });
     }
     
@@ -836,9 +876,9 @@ function initPayoffPlanner() {
     if (addBtn) {
         addBtn.addEventListener("click", () => {
             const name = nameInput.value.trim();
-            const balance = parseFloat(balanceInput.value);
+            const balance = parseFloat(balanceInput.value.replace(/,/g, ''));
             const rate = parseFloat(rateInput.value);
-            const emi = parseFloat(emiInput.value);
+            const emi = parseFloat(emiInput.value.replace(/,/g, ''));
             
             if (!name || isNaN(balance) || isNaN(rate) || isNaN(emi) || balance <= 0 || rate <= 0 || emi <= 0) {
                 alert("Please enter valid positive values for all loan fields.");
@@ -893,8 +933,8 @@ function initPayoffPlanner() {
                 return;
             }
             
-            const extraMonthly = parseFloat(document.getElementById("payoff-extra-monthly").value) || 0;
-            const extraAnnual = parseFloat(document.getElementById("payoff-extra-annual").value) || 0;
+            const extraMonthly = parseFloat(document.getElementById("payoff-extra-monthly").value.replace(/,/g, '')) || 0;
+            const extraAnnual = parseFloat(document.getElementById("payoff-extra-annual").value.replace(/,/g, '')) || 0;
             const strategy = document.getElementById("payoff-strategy").value;
             
             // Calculate total minimum EMI required
@@ -1066,9 +1106,9 @@ window.editPlannerLoan = function(id) {
     if (!loan) return;
     
     document.getElementById("payoff-loan-name").value = loan.name;
-    document.getElementById("payoff-loan-balance").value = loan.balance;
+    document.getElementById("payoff-loan-balance").value = new Intl.NumberFormat('en-IN').format(loan.balance);
     document.getElementById("payoff-loan-rate").value = loan.rate;
-    document.getElementById("payoff-loan-emi").value = loan.emi;
+    document.getElementById("payoff-loan-emi").value = new Intl.NumberFormat('en-IN').format(loan.emi);
     
     const balanceText = document.getElementById("payoff-loan-balance-text");
     const emiText = document.getElementById("payoff-loan-emi-text");
