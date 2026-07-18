@@ -1002,7 +1002,14 @@ function initPayoffPlanner() {
                     avalancheData.push(avaItem ? avaItem.remainingDebt : 0);
                     
                     let snowItem = snowballPlan.timeline.find(x => x.month === m);
-                    snowballData.push(snowItem ? snowItem.remainingDebt : 0);
+                    let snowVal = snowItem ? snowItem.remainingDebt : 0;
+                    
+                    // ponytail: Apply a tiny parabolic visual offset (0.8% peak) to prevent overlapping curves from hiding each other on high-value y-axis scaling
+                    if (m > 0 && m < maxMonths && snowVal > 0) {
+                        const offset = totalStartingDebt * 0.008 * (m / maxMonths) * (1 - m / maxMonths);
+                        snowVal += offset;
+                    }
+                    snowballData.push(snowVal);
                 }
                 
                 const ctx = document.getElementById("payoff-timeline-chart").getContext("2d");
