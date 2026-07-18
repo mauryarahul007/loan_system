@@ -572,7 +572,7 @@ function initSearchGaps() {
                 <td class="number" style="font-weight: 600;">${item.volume.toLocaleString("en-IN")}</td>
                 <td><span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">${item.type}</span></td>
                 <td class="number" style="white-space: nowrap;">${qualityStars} <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">(${item.quality}/5)</span></td>
-                <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px;">${item.gapScore.toLocaleString("en-IN")}</td>
+                <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px; cursor: help;" title="Gap Score = (Search Volume / 1000) * (5 - Competitor Answer Quality). A higher score indicates a large, poorly-answered search demand.">${item.gapScore.toLocaleString("en-IN")}</td>
                 <td style="font-weight: 500; color: var(--accent-purple);">${item.format}</td>
             `;
             tableBody.appendChild(tr);
@@ -633,7 +633,7 @@ function initOpportunities() {
                 <td class="number">${opp.impact}</td>
                 <td class="number">${opp.confidence}</td>
                 <td class="number" style="font-weight: 600;">${opp.effort}</td>
-                <td class="number" style="font-weight: 700; color: var(--accent-purple); font-size: 15px;">${opp.rice.toFixed(1)}</td>
+                <td class="number" style="font-weight: 700; color: var(--accent-purple); font-size: 15px; cursor: help;" title="RICE Score = (Reach * Impact * Confidence) / Effort. Reach: target audience size. Impact: value to customer. Confidence: our certainty of impact. Effort: months to build.">${opp.rice.toFixed(1)}</td>
                 <td style="text-align: center;"><span class="${priorityClass}">${opp.priority}</span></td>
                 <td style="font-size: 12.5px; font-weight: 500; color: var(--text-secondary);">${opp.evidence}</td>
             `;
