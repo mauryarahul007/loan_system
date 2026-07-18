@@ -1311,6 +1311,16 @@ function initPayoffPlanner() {
         });
     }
     
+    // Strategy selection change listener to auto-update charts and reports
+    const strategySelect = document.getElementById("payoff-strategy");
+    if (strategySelect) {
+        strategySelect.addEventListener("change", () => {
+            if (plannerLoans.length > 0 && calcBtn) {
+                calcBtn.click();
+            }
+        });
+    }
+    
     // Initial Render
     renderPlannerLoans();
 }
