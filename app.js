@@ -945,9 +945,13 @@ function initPayoffPlanner() {
             // Calculate total minimum EMI required
             const totalMinEMI = plannerLoans.reduce((sum, l) => sum + l.emi, 0);
             
-            // Run simulations (optimized vs baseline)
-            const prepayPlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, strategy, false);
+            // Run simulations (avalanche, snowball, baseline)
+            const avalanchePlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, "avalanche", false);
+            const snowballPlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, "snowball", false);
             const baselinePlan = runPayoffSimulation(plannerLoans, 0, 0, strategy, true);
+            
+            // Selected plan based on dropdown choice
+            const prepayPlan = strategy === "avalanche" ? avalanchePlan : snowballPlan;
             
             // Calculate differences
             const interestSaved = Math.max(0, Math.round(baselinePlan.totalInterest - prepayPlan.totalInterest));
@@ -969,16 +973,18 @@ function initPayoffPlanner() {
             
             // Build chart datasets
             try {
-                const maxMonths = Math.max(baselinePlan.months, prepayPlan.months);
+                const maxMonths = Math.max(baselinePlan.months, avalanchePlan.months, snowballPlan.months);
                 const labels = [];
                 const baselineData = [];
-                const optimizedData = [];
+                const avalancheData = [];
+                const snowballData = [];
                 
                 // Starting point (Month 0)
                 labels.push("Start");
                 const totalStartingDebt = plannerLoans.reduce((sum, l) => sum + l.balance, 0);
                 baselineData.push(totalStartingDebt);
-                optimizedData.push(totalStartingDebt);
+                avalancheData.push(totalStartingDebt);
+                snowballData.push(totalStartingDebt);
                 
                 for (let m = 1; m <= maxMonths; m++) {
                     if (m % 12 === 0) {
@@ -992,8 +998,11 @@ function initPayoffPlanner() {
                     let baseItem = baselinePlan.timeline.find(x => x.month === m);
                     baselineData.push(baseItem ? baseItem.remainingDebt : 0);
                     
-                    let optItem = prepayPlan.timeline.find(x => x.month === m);
-                    optimizedData.push(optItem ? optItem.remainingDebt : 0);
+                    let avaItem = avalanchePlan.timeline.find(x => x.month === m);
+                    avalancheData.push(avaItem ? avaItem.remainingDebt : 0);
+                    
+                    let snowItem = snowballPlan.timeline.find(x => x.month === m);
+                    snowballData.push(snowItem ? snowItem.remainingDebt : 0);
                 }
                 
                 const ctx = document.getElementById("payoff-timeline-chart").getContext("2d");
@@ -1001,36 +1010,39 @@ function initPayoffPlanner() {
                     payoffChartInstance.destroy();
                 }
                 
-                const gradientOpt = ctx.createLinearGradient(0, 0, 0, 240);
-                gradientOpt.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
-                gradientOpt.addColorStop(1, 'rgba(16, 185, 129, 0)');
-                
-                const gradientBase = ctx.createLinearGradient(0, 0, 0, 240);
-                gradientBase.addColorStop(0, 'rgba(148, 163, 184, 0.1)');
-                gradientBase.addColorStop(1, 'rgba(148, 163, 184, 0)');
-                
                 payoffChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [
                             {
-                                label: 'Optimized Prepayments',
-                                data: optimizedData,
-                                borderColor: '#10b981',
-                                backgroundColor: gradientOpt,
-                                fill: true,
+                                label: 'Debt Avalanche (Highest Interest First)',
+                                data: avalancheData,
+                                borderColor: '#10b981', // Emerald
+                                backgroundColor: 'rgba(16, 185, 129, 0.03)',
+                                fill: false,
                                 tension: 0.3,
                                 borderWidth: 3,
                                 pointRadius: 0,
                                 pointHoverRadius: 5
                             },
                             {
-                                label: 'Standard Schedule',
+                                label: 'Debt Snowball (Smallest Balance First)',
+                                data: snowballData,
+                                borderColor: '#8b5cf6', // Purple
+                                backgroundColor: 'rgba(139, 92, 246, 0.03)',
+                                fill: false,
+                                tension: 0.3,
+                                borderWidth: 3,
+                                pointRadius: 0,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Standard Schedule (Baseline)',
                                 data: baselineData,
-                                borderColor: '#94a3b8',
-                                backgroundColor: gradientBase,
-                                fill: true,
+                                borderColor: '#94a3b8', // Slate grey
+                                backgroundColor: 'rgba(148, 163, 184, 0.03)',
+                                fill: false,
                                 tension: 0.3,
                                 borderWidth: 2,
                                 borderDash: [5, 5],
