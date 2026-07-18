@@ -17,7 +17,6 @@ FALLBACK_COMPLAINTS = [
         "text": "SBI Home Loan division took 3 months to process my top-up loan even after verifying all documents. The branch manager keeps asking for additional property search reports.",
         "theme": "Slow / unclear process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Top-up processing timeline tracking & branch escalations",
         "notes": "SBI slow approval times"
@@ -29,7 +28,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Is it legal for Axis Bank to charge ₹5000 as 'administrative charges' for floating rate reset? They claim it is not a prepayment fee.",
         "theme": "Hidden charges / fees",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Rate-reset charge transparency list",
         "notes": "Admin fee loophole"
@@ -41,7 +39,6 @@ FALLBACK_COMPLAINTS = [
         "text": "DHFL (now Piramal) refuses to release original sale deed even after full settlement. They claim the document is misplaced in their central vault.",
         "theme": "Foreclosure process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 5,
         "feature": "Misplaced documents legal guide & duplicate acquisition workflow",
         "notes": "Document loss by lender"
@@ -53,7 +50,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Borrowers lose out on tax deductions under Section 80C because their bank takes months to issue the provisional interest certificate before March 31st.",
         "theme": "Tax benefit confusion",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 3,
         "feature": "Provisional interest certificate downloader & format tips",
         "notes": "Year-end tax certificate delays"
@@ -65,7 +61,6 @@ FALLBACK_COMPLAINTS = [
         "text": "I made a part-payment of 2 Lakhs on my ICICI home loan. The bank reduced my tenure but kept the EMI same without any notification or choice given.",
         "theme": "Prepayment confusion",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Prepayment choice manager / Tenure vs EMI simulator",
         "notes": "Uninformed tenure reduction default"
@@ -77,7 +72,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Bajaj Housing Finance charged me GST at 18% on a processing fee they promised was flat and all-inclusive. Very misleading marketing.",
         "theme": "Hidden charges / fees",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Processing fee & GST calculator",
         "notes": "Misrepresented fee structures"
@@ -89,7 +83,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Can joint owners claim tax benefits if only one owner is paying the EMI from their account? I am getting conflicting tax advice.",
         "theme": "Tax benefit confusion",
         "pain": "Yes",
-        "sentiment": "Neutral",
         "severity": 3,
         "feature": "Joint-borrower tax payment optimizer",
         "notes": "Joint ownership split rules"
@@ -101,7 +94,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Indiabulls Home Loans did not update my floating rate when RBI decreased repo rates, but they instantly increased it when repo rates hiked.",
         "theme": "Fixed vs floating doubt",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 5,
         "feature": "Repo-rate spread reset tracker",
         "notes": "Lenders delaying rate cuts"
@@ -113,7 +105,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Most home loan calculators online do not show the real amortization schedule if you plan to do a 5% prepayment every year. They ignore compounding effects.",
         "theme": "Poor calculators",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 3,
         "feature": "Compounding annual prepayment simulator",
         "notes": "Basic calculators ignore prepay cycles"
@@ -125,7 +116,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Does anyone have experience transferring a home loan from HDFC to SBI? The legal and valuation charges at SBI are eating into my rate savings.",
         "theme": "Balance transfer confusion",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 3,
         "feature": "Balance transfer switching cost net calculator",
         "notes": "Switching costs erode rate savings"
@@ -137,7 +127,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Bank is forcing me to buy a home insurance policy from their partner insurer to sanction the loan. They claim it is mandatory by RBI, which is false.",
         "theme": "Hidden charges / fees",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Bundled insurance legal rights explainer",
         "notes": "Forced insurance bundles"
@@ -149,7 +138,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Canara Bank charged a foreclosure penalty of 2% on my floating rate loan because it was taken under a co-applicant who is a proprietor.",
         "theme": "Foreclosure process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Proprietorship loan classification penalty guide",
         "notes": "Co-applicant business classification loophole"
@@ -161,7 +149,6 @@ FALLBACK_COMPLAINTS = [
         "text": "IDFC First Bank took 25 days just to issue the foreclosure letter so I could initiate a balance transfer to another bank. Heavy delay tactics.",
         "theme": "Slow / unclear process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 5,
         "feature": "Foreclosure letter release workflow & timeline laws",
         "notes": "Foreclosure letter delay"
@@ -173,7 +160,6 @@ FALLBACK_COMPLAINTS = [
         "text": "If I prepay my home loan, does it affect my CIBIL score? I heard closing a long-term credit account can drop your credit score.",
         "theme": "Other",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 3,
         "feature": "Post-closure checklist & CIBIL score impact guide",
         "notes": "CIBIL score drop after loan closure"
@@ -185,7 +171,6 @@ FALLBACK_COMPLAINTS = [
         "text": "How is pre-construction interest claimed? My builder delayed possession by 3 years, and I don't know how to calculate the 5 equal installments.",
         "theme": "Tax benefit confusion",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 3,
         "feature": "5-installment pre-construction interest claims guide",
         "notes": "Builder delay tax implications"
@@ -197,7 +182,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Tata Capital charged me a hidden 'valuer fee' of ₹4,500 that was never mentioned in the sanction letter. They deducted it from the disbursed amount.",
         "theme": "Hidden charges / fees",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Sanction vs disbursed amount calculator",
         "notes": "Valuer fee deduction at source"
@@ -209,7 +193,6 @@ FALLBACK_COMPLAINTS = [
         "text": "PNB Housing Finance keeps changing the spread of my floating rate, making the effective interest rate much higher than other public banks.",
         "theme": "Fixed vs floating doubt",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Spread adjustment history compare tool",
         "notes": "Spread hikes mask baseline rate"
@@ -221,7 +204,6 @@ FALLBACK_COMPLAINTS = [
         "text": "Bank defaults to reducing tenure after prepayment. Tried calling HDFC customer care to reduce EMI instead, but they asked me to visit the physical branch.",
         "theme": "Prepayment confusion",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Prepayment EMI-reduction branch request drafts",
         "notes": "Red-tape on EMI adjustments"
@@ -233,7 +215,6 @@ FALLBACK_COMPLAINTS = [
         "text": "I paid off my home loan last week. How long does the bank take to update CERSAI register and clear the charge? What if they delay?",
         "theme": "Foreclosure process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "CERSAI charge clearance checking & escalation guidelines",
         "notes": "CERSAI clearance delay"
@@ -245,18 +226,71 @@ FALLBACK_COMPLAINTS = [
         "text": "Federal Bank is demanding an NOC from the society before releasing my title deeds, even though the loan is closed. Unnecessary bureaucracy.",
         "theme": "Foreclosure process",
         "pain": "Yes",
-        "sentiment": "Negative",
         "severity": 4,
         "feature": "Document release prerequisites checklists",
         "notes": "Lender demands unnecessary NOCs"
     }
 ]
 
+def analyze_sentiment(text):
+    lower_text = text.lower()
+    
+    # Lexicon lists
+    negatives = {
+        'complaint', 'issue', 'delay', 'disappointed', 'bad', 'worst', 'wrong', 'charge', 
+        'penalty', 'fail', 'mislead', 'hidden', 'relentless', 'spam', 'scam', 'error', 
+        'unhappy', 'displeasure', 'frustrated', 'confused', 'opacity', 'bureaucracy', 
+        'refuse', 'slow', 'hostage', 'dispute', 'ignore', 'worse', 'delayed', 'charges',
+        'penalties', 'disappointment', 'failing', 'misleading', 'fails', 'errors',
+        'refused', 'refuses', 'slowing', 'disputes', 'ignored', 'ignoring', 'conflict',
+        'conflicting', 'disappointing', 'displeased', 'worry', 'worried'
+    }
+    
+    positives = {
+        'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
+        'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
+        'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
+        'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
+        'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
+    }
+    
+    negations = {'no', 'not', 'never', 'cannot', 'cant', 'didnt', 'dont', 'neither', 'nor', 'wont', 'lack'}
+    
+    score = 0
+    words = lower_text.split()
+    
+    for idx, word in enumerate(words):
+        clean_word = word.strip(".,!?;:()\"'")
+        
+        word_score = 0
+        if clean_word in negatives:
+            word_score = -1
+        elif clean_word in positives:
+            word_score = 1
+            
+        if word_score != 0:
+            negated = False
+            for lookback in range(1, 3):
+                if idx - lookback >= 0:
+                    prev_word = words[idx - lookback].strip(".,!?;:()\"'")
+                    if prev_word in negations:
+                        negated = True
+                        break
+            if negated:
+                word_score = -word_score
+            score += word_score
+            
+    if score < 0:
+        return "Negative"
+    elif score > 0:
+        return "Positive"
+    else:
+        return "Neutral"
+
 def run_scrapling_scan(existing_texts):
     print("Initiating Scrapling web scanner...")
     scraped_results = []
     
-    # We will target multiple queries to scrape from Quora, MouthShut, Consumer Forums, and custom blogs
     queries = [
         "site:reddit.com/r/IndiaInvestments home loan prepayment complaint",
         "site:mouthshut.com home loan foreclosure penalty issues",
@@ -277,7 +311,7 @@ def run_scrapling_scan(existing_texts):
                 results = response.css(".result")
                 print(f"Found {len(results)} results for query '{q}'")
                 
-                for r in results[:5]:  # Process top 5 results per query
+                for r in results[:5]:
                     title_elem = r.css(".result__title a")
                     snippet_elem = r.css(".result__snippet")
                     
@@ -288,12 +322,10 @@ def run_scrapling_scan(existing_texts):
                         snippet = snippet.strip()
                         href = title_elem.css("::attr(href)").get() or ""
                         
-                        # Normalize text to check duplicates
                         normalized_txt = snippet.strip().lower()
                         if normalized_txt in existing_texts:
                             continue
                             
-                        # Deduce platform & source
                         platform = "Blog/Forum"
                         source_domain = "Search Result"
                         
@@ -310,7 +342,6 @@ def run_scrapling_scan(existing_texts):
                         
                         lower_snippet = snippet.lower()
                         if any(kw in lower_snippet for kw in ["loan", "prepay", "charge", "tenure", "emi", "bank", "interest", "deed"]):
-                            # Determine theme
                             theme = "Other"
                             feature = "General informational guide"
                             severity = 3
@@ -343,13 +374,12 @@ def run_scrapling_scan(existing_texts):
                                 "text": snippet[:200] + "..." if len(snippet) > 200 else snippet,
                                 "theme": theme,
                                 "pain": "Yes",
-                                "sentiment": "Negative",
+                                "sentiment": analyze_sentiment(snippet),
                                 "severity": severity,
                                 "feature": feature,
                                 "notes": f"Scraped from: {title[:40]}"
                             }
                             
-                            # Double check that we don't add duplicate in this batch
                             if not any(x["text"].strip().lower() == normalized_txt for x in scraped_results):
                                 scraped_results.append(item)
                                 existing_texts.add(normalized_txt)
@@ -367,19 +397,22 @@ def run_scrapling_scan(existing_texts):
         for fallback in FALLBACK_COMPLAINTS:
             normalized_fallback_text = fallback["text"].strip().lower()
             if normalized_fallback_text not in existing_texts:
-                final_results.append(fallback)
+                # Dynamically analyze sentiment
+                fallback_copy = fallback.copy()
+                fallback_copy["sentiment"] = analyze_sentiment(fallback_copy["text"])
+                final_results.append(fallback_copy)
                 existing_texts.add(normalized_fallback_text)
                 if len(final_results) >= 10:
                     break
                     
-    # In the rare case that we still need more (e.g. everything is already in Excel), pull fallback items, 
-    # but append a suffix or timestamp to make them unique
+    # Suffix matching fallback duplicates in rare scenarios to make them unique
     if len(final_results) < 10:
         fill_count = 10 - len(final_results)
         for i in range(fill_count):
             base_item = FALLBACK_COMPLAINTS[i % len(FALLBACK_COMPLAINTS)]
             unique_item = base_item.copy()
             unique_item["text"] = f"{unique_item['text']} (Ref: Rescan #{i+1})"
+            unique_item["sentiment"] = analyze_sentiment(unique_item["text"])
             final_results.append(unique_item)
             
     print(f"Scrape completed. Returning {len(final_results)} new unique issues.")
@@ -449,7 +482,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
                 existing_texts = load_existing_excel_texts()
                 print(f"Loaded {len(existing_texts)} existing texts to prevent duplicates.")
                 
-                # Fetch exactly 10+ new unique complaints
+                # Fetch exactly 10+ new unique complaints with dynamic sentiment analysis
                 new_items = run_scrapling_scan(existing_texts)
                 excel_updated = update_excel_tracker(new_items)
                 

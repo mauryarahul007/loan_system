@@ -186,6 +186,7 @@ function initDashboard() {
     
     const negativeCount = socialLog.filter(item => item.sentiment === "Negative").length;
     const neutralCount = socialLog.filter(item => item.sentiment === "Neutral").length;
+    const positiveCount = socialLog.filter(item => item.sentiment === "Positive").length;
     const negativePct = Math.round((negativeCount / totalComments) * 100);
     
     // Set Stat boxes
@@ -223,6 +224,8 @@ function initDashboard() {
     // Populate Donut Legend numbers
     document.getElementById("legend-neg-count").textContent = negativeCount;
     document.getElementById("legend-neu-count").textContent = neutralCount;
+    const legendPos = document.getElementById("legend-pos-count");
+    if (legendPos) legendPos.textContent = positiveCount;
     document.getElementById("donut-label-pct").textContent = `${negativePct}%`;
     
     // Populate Theme Bars in dashboard panel
@@ -257,16 +260,22 @@ function animateCharts() {
     const totalComments = socialLog.length;
     const negativeCount = socialLog.filter(item => item.sentiment === "Negative").length;
     const neutralCount = socialLog.filter(item => item.sentiment === "Neutral").length;
+    const positiveCount = socialLog.filter(item => item.sentiment === "Positive").length;
     
     const negPct = negativeCount / totalComments;
     const neuPct = neutralCount / totalComments;
+    const posPct = positiveCount / totalComments;
     
     // Circumference = 2 * PI * r = 2 * 3.14159 * 40 = 251.2
     const totalCircumference = 251.2;
     
     const negOffset = totalCircumference - (negPct * totalCircumference);
+    
     const neuStrokeDash = neuPct * totalCircumference;
-    const neuOffset = totalCircumference - (negPct * totalCircumference) - neuStrokeDash;
+    const neuOffset = totalCircumference - ((negPct + neuPct) * totalCircumference);
+    
+    const posStrokeDash = posPct * totalCircumference;
+    const posOffset = totalCircumference - ((negPct + neuPct + posPct) * totalCircumference);
     
     // Slice Negative
     const sliceNeg = document.getElementById("donut-slice-neg");
@@ -277,6 +286,13 @@ function animateCharts() {
     const sliceNeu = document.getElementById("donut-slice-neu");
     sliceNeu.style.strokeDasharray = `${totalCircumference}`;
     sliceNeu.style.strokeDashoffset = `${neuOffset}`;
+    
+    // Slice Positive
+    const slicePos = document.getElementById("donut-slice-pos");
+    if (slicePos) {
+        slicePos.style.strokeDasharray = `${totalCircumference}`;
+        slicePos.style.strokeDashoffset = `${posOffset}`;
+    }
     
     // Animate Theme priority bars
     const themeFills = document.querySelectorAll(".theme-bar-fill");
