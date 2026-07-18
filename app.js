@@ -763,12 +763,35 @@ function classifySentiment(text) {
     if (words.some(w => POSITIVES_SET.has(w))) {
         return "Appreciation";
     }
-  // --- 9. LOAN PAYOFF PLANNER CORE MODULE ---
+    return "Discussion";
+}
+
+// --- 9. LOAN PAYOFF PLANNER CORE MODULE ---
 
 let plannerLoans = [
     { id: 1, name: "SBI Home Loan", balance: 4500000, rate: 8.5, emi: 39000 }
 ];
 let editingLoanId = null;
+
+function convertToIndianWords(value) {
+    if (isNaN(value) || value <= 0) return "";
+    let formatted = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
+    
+    let text = "";
+    if (value >= 10000000) {
+        let cr = value / 10000000;
+        text = `${cr.toFixed(2).replace(/\.00$/, "")} Crore`;
+    } else if (value >= 100000) {
+        let lakh = value / 100000;
+        text = `${lakh.toFixed(2).replace(/\.00$/, "")} Lakh`;
+    } else if (value >= 1000) {
+        let th = value / 1000;
+        text = `${th.toFixed(2).replace(/\.00$/, "")} Thousand`;
+    } else {
+        text = `${value}`;
+    }
+    return `${formatted} (${text} Rupees)`;
+}
 
 function initPayoffPlanner() {
     const nameInput = document.getElementById("payoff-loan-name");
@@ -777,6 +800,37 @@ function initPayoffPlanner() {
     const emiInput = document.getElementById("payoff-loan-emi");
     const addBtn = document.getElementById("payoff-add-loan-btn");
     const calcBtn = document.getElementById("payoff-calculate-btn");
+    
+    const balanceText = document.getElementById("payoff-loan-balance-text");
+    const emiText = document.getElementById("payoff-loan-emi-text");
+    const extraMonthlyInput = document.getElementById("payoff-extra-monthly");
+    const extraMonthlyText = document.getElementById("payoff-extra-monthly-text");
+    const extraAnnualInput = document.getElementById("payoff-extra-annual");
+    const extraAnnualText = document.getElementById("payoff-extra-annual-text");
+    
+    // Bind dynamic input value formatting events
+    if (balanceInput && balanceText) {
+        balanceInput.addEventListener("input", () => {
+            balanceText.textContent = convertToIndianWords(parseFloat(balanceInput.value));
+        });
+    }
+    if (emiInput && emiText) {
+        emiInput.addEventListener("input", () => {
+            emiText.textContent = convertToIndianWords(parseFloat(emiInput.value));
+        });
+    }
+    if (extraMonthlyInput && extraMonthlyText) {
+        extraMonthlyText.textContent = convertToIndianWords(parseFloat(extraMonthlyInput.value));
+        extraMonthlyInput.addEventListener("input", () => {
+            extraMonthlyText.textContent = convertToIndianWords(parseFloat(extraMonthlyInput.value));
+        });
+    }
+    if (extraAnnualInput && extraAnnualText) {
+        extraAnnualText.textContent = convertToIndianWords(parseFloat(extraAnnualInput.value));
+        extraAnnualInput.addEventListener("input", () => {
+            extraAnnualText.textContent = convertToIndianWords(parseFloat(extraAnnualInput.value));
+        });
+    }
     
     // Add loan event listener
     if (addBtn) {
@@ -826,6 +880,8 @@ function initPayoffPlanner() {
             balanceInput.value = "";
             rateInput.value = "";
             emiInput.value = "";
+            if (balanceText) balanceText.textContent = "";
+            if (emiText) emiText.textContent = "";
         });
     }
     
@@ -1013,6 +1069,11 @@ window.editPlannerLoan = function(id) {
     document.getElementById("payoff-loan-balance").value = loan.balance;
     document.getElementById("payoff-loan-rate").value = loan.rate;
     document.getElementById("payoff-loan-emi").value = loan.emi;
+    
+    const balanceText = document.getElementById("payoff-loan-balance-text");
+    const emiText = document.getElementById("payoff-loan-emi-text");
+    if (balanceText) balanceText.textContent = convertToIndianWords(loan.balance);
+    if (emiText) emiText.textContent = convertToIndianWords(loan.emi);
     
     editingLoanId = id;
     const addBtn = document.getElementById("payoff-add-loan-btn");

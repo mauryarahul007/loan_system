@@ -378,6 +378,7 @@
                                     <div class="input-field-group">
                                         <label for="payoff-loan-balance" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Balance (₹)</label>
                                         <input type="number" id="payoff-loan-balance" placeholder="e.g. 4500000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                        <div id="payoff-loan-balance-text" style="font-size: 11px; color: var(--accent-orange); margin-top: 4px; font-weight: 600; min-height: 15px;"></div>
                                     </div>
                                     <div class="input-field-group">
                                         <label for="payoff-loan-rate" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Interest Rate (%)</label>
@@ -386,6 +387,7 @@
                                     <div class="input-field-group" style="grid-column: span 2;">
                                         <label for="payoff-loan-emi" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Minimum Monthly EMI (₹)</label>
                                         <input type="number" id="payoff-loan-emi" placeholder="e.g. 39000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                        <div id="payoff-loan-emi-text" style="font-size: 11px; color: var(--accent-orange); margin-top: 4px; font-weight: 600; min-height: 15px;"></div>
                                     </div>
                                 </div>
                                 <button id="payoff-add-loan-btn" class="btn-primary" style="width: 100%;">Add Loan</button>
@@ -419,10 +421,12 @@
                                     <div class="input-field-group">
                                         <label for="payoff-extra-monthly" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Extra Monthly Prepayment (₹)</label>
                                         <input type="number" id="payoff-extra-monthly" value="15000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                        <div id="payoff-extra-monthly-text" style="font-size: 11px; color: var(--accent-orange); margin-top: 4px; font-weight: 600; min-height: 15px;"></div>
                                     </div>
                                     <div class="input-field-group">
                                         <label for="payoff-extra-annual" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Annual One-Off Prepayment (₹)</label>
                                         <input type="number" id="payoff-extra-annual" value="100000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                        <div id="payoff-extra-annual-text" style="font-size: 11px; color: var(--accent-orange); margin-top: 4px; font-weight: 600; min-height: 15px;"></div>
                                     </div>
                                     <div class="input-field-group">
                                         <label for="payoff-strategy" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Payoff Method / Priority Strategy</label>
