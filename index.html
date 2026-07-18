@@ -473,6 +473,14 @@
                                     </div>
                                 </div>
                                 
+                                <!-- Payoff Timeline Chart -->
+                                <div class="stat-card" style="padding: 20px; margin-bottom: 20px;">
+                                    <h4 style="margin: 0 0 15px 0; color: var(--text-primary); font-size: 14px;">Debt Balance Projection over Time</h4>
+                                    <div style="position: relative; width: 100%; height: 260px;">
+                                        <canvas id="payoff-timeline-chart"></canvas>
+                                    </div>
+                                </div>
+                                
                                 <!-- Paydown Guidance Instructions -->
                                 <div class="stat-card" style="padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--accent-orange);">
                                     <h4 style="margin: 0 0 10px 0; color: var(--text-primary); font-size: 14px;">Payoff Action Plan</h4>
@@ -510,6 +518,7 @@
         </main>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

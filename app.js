@@ -772,6 +772,7 @@ let plannerLoans = [
     { id: 1, name: "SBI Home Loan", balance: 4500000, rate: 8.5, emi: 39000 }
 ];
 let editingLoanId = null;
+let payoffChartInstance = null;
 
 function convertToIndianWords(value) {
     if (isNaN(value) || value <= 0) return "";
@@ -960,6 +961,133 @@ function initPayoffPlanner() {
             freeDate.setMonth(freeDate.getMonth() + prepayPlan.months);
             const dateOpts = { year: 'numeric', month: 'long' };
             document.getElementById("payoff-debt-free-date").textContent = freeDate.toLocaleDateString('en-US', dateOpts);
+            
+            // Build chart datasets
+            try {
+                const maxMonths = Math.max(baselinePlan.months, prepayPlan.months);
+                const labels = [];
+                const baselineData = [];
+                const optimizedData = [];
+                
+                // Starting point (Month 0)
+                labels.push("Start");
+                const totalStartingDebt = plannerLoans.reduce((sum, l) => sum + l.balance, 0);
+                baselineData.push(totalStartingDebt);
+                optimizedData.push(totalStartingDebt);
+                
+                for (let m = 1; m <= maxMonths; m++) {
+                    if (m % 12 === 0) {
+                        labels.push(`Yr ${m/12}`);
+                    } else if (m === maxMonths) {
+                        labels.push(`M ${m}`);
+                    } else {
+                        labels.push("");
+                    }
+                    
+                    let baseItem = baselinePlan.timeline.find(x => x.month === m);
+                    baselineData.push(baseItem ? baseItem.remainingDebt : 0);
+                    
+                    let optItem = prepayPlan.timeline.find(x => x.month === m);
+                    optimizedData.push(optItem ? optItem.remainingDebt : 0);
+                }
+                
+                const ctx = document.getElementById("payoff-timeline-chart").getContext("2d");
+                if (payoffChartInstance) {
+                    payoffChartInstance.destroy();
+                }
+                
+                const gradientOpt = ctx.createLinearGradient(0, 0, 0, 240);
+                gradientOpt.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+                gradientOpt.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                
+                const gradientBase = ctx.createLinearGradient(0, 0, 0, 240);
+                gradientBase.addColorStop(0, 'rgba(148, 163, 184, 0.1)');
+                gradientBase.addColorStop(1, 'rgba(148, 163, 184, 0)');
+                
+                payoffChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Optimized Prepayments',
+                                data: optimizedData,
+                                borderColor: '#10b981',
+                                backgroundColor: gradientOpt,
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 3,
+                                pointRadius: 0,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Standard Schedule',
+                                data: baselineData,
+                                borderColor: '#94a3b8',
+                                backgroundColor: gradientBase,
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                pointHoverRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "'Inter', sans-serif", size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: '#1e293b',
+                                titleColor: '#e2e8f0',
+                                bodyColor: '#94a3b8',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) {
+                                            label += fmt(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif", size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: { family: "'Inter', sans-serif", size: 10 },
+                                    callback: function(value) {
+                                        if (value >= 10000000) return '₹' + (value / 10000000).toFixed(1) + ' Cr';
+                                        if (value >= 100000) return '₹' + (value / 100000).toFixed(0) + ' L';
+                                        if (value >= 1000) return '₹' + (value / 1000).toFixed(0) + ' K';
+                                        return '₹' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to render payoff timeline chart:", err);
+            }
             
             // Populate Step-by-Step Instructions
             const sortedLoans = [...plannerLoans];
