@@ -775,7 +775,6 @@ let editingLoanId = null;
 
 function convertToIndianWords(value) {
     if (isNaN(value) || value <= 0) return "";
-    let formatted = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
     
     let text = "";
     if (value >= 10000000) {
@@ -790,7 +789,7 @@ function convertToIndianWords(value) {
     } else {
         text = `${value}`;
     }
-    return `${formatted} (${text} Rupees)`;
+    return `${text} Rupees`;
 }
 
 function formatInputElement(inputElement, labelElement) {
