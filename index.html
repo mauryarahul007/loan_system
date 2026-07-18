@@ -47,6 +47,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     <span>RICE Prioritisation</span>
                 </button>
+                <button class="menu-item" data-tab="payoff">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <span>Payoff Planner</span>
+                </button>
             </nav>
             
             <div class="sidebar-footer">
@@ -358,6 +362,146 @@
                     </div>
                 </section>
                 
+                <!-- Tab: Payoff Planner -->
+                <section id="tab-payoff" class="tab-pane">
+                    <div class="planner-grid">
+                        <!-- Left Panel: Inputs & Active Loans -->
+                        <div class="planner-inputs-panel">
+                            <!-- Add a Loan Card -->
+                            <div class="stat-card" style="margin-bottom: 20px; padding: 20px;">
+                                <h3 style="margin-top: 0; margin-bottom: 15px; color: var(--text-primary); font-size: 16px;">1. Add a Loan</h3>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                    <div class="input-field-group" style="grid-column: span 2;">
+                                        <label for="payoff-loan-name" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Loan Name</label>
+                                        <input type="text" id="payoff-loan-name" placeholder="e.g. Home Loan" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                    <div class="input-field-group">
+                                        <label for="payoff-loan-balance" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Balance (₹)</label>
+                                        <input type="number" id="payoff-loan-balance" placeholder="e.g. 4500000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                    <div class="input-field-group">
+                                        <label for="payoff-loan-rate" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Interest Rate (%)</label>
+                                        <input type="number" step="0.05" id="payoff-loan-rate" placeholder="e.g. 8.5" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                    <div class="input-field-group" style="grid-column: span 2;">
+                                        <label for="payoff-loan-emi" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Minimum Monthly EMI (₹)</label>
+                                        <input type="number" id="payoff-loan-emi" placeholder="e.g. 39000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                </div>
+                                <button id="payoff-add-loan-btn" class="btn-primary" style="width: 100%;">Add Loan</button>
+                            </div>
+                            
+                            <!-- Active Loans List -->
+                            <div class="stat-card" style="margin-bottom: 20px; padding: 20px;">
+                                <h3 style="margin-top: 0; margin-bottom: 15px; color: var(--text-primary); font-size: 16px;">2. Active Loans List</h3>
+                                <div class="table-container" style="max-height: 180px; overflow-y: auto;">
+                                    <table style="font-size: 12px;">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Balance</th>
+                                                <th>Rate</th>
+                                                <th>Min EMI</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="payoff-loans-list">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Prepayment Strategy Card -->
+                            <div class="stat-card" style="padding: 20px;">
+                                <h3 style="margin-top: 0; margin-bottom: 15px; color: var(--text-primary); font-size: 16px;">3. Prepayment Settings</h3>
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px;">
+                                    <div class="input-field-group">
+                                        <label for="payoff-extra-monthly" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Extra Monthly Prepayment (₹)</label>
+                                        <input type="number" id="payoff-extra-monthly" value="15000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                    <div class="input-field-group">
+                                        <label for="payoff-extra-annual" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Annual One-Off Prepayment (₹)</label>
+                                        <input type="number" id="payoff-extra-annual" value="100000" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);">
+                                    </div>
+                                    <div class="input-field-group">
+                                        <label for="payoff-strategy" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Payoff Method / Priority Strategy</label>
+                                        <div class="select-wrapper" style="width: 100%;">
+                                            <select id="payoff-strategy" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+                                                <option value="avalanche">Highest Interest First (Debt Avalanche)</option>
+                                                <option value="snowball">Smallest Balance First (Debt Snowball)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="payoff-calculate-btn" class="btn-primary" style="width: 100%; background: linear-gradient(135deg, var(--accent-orange), var(--accent-red)); font-weight: 700;">Calculate payoff Plan</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Payoff Report -->
+                        <div class="planner-report-panel">
+                            <!-- Empty state / Initial State Prompt -->
+                            <div id="payoff-empty-state" class="stat-card text-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; padding: 40px;">
+                                <div style="font-size: 40px; margin-bottom: 15px; color: var(--text-muted);">📊</div>
+                                <h3 style="color: var(--text-primary); margin-top: 0;">payoff Acceleration Report</h3>
+                                <p style="color: var(--text-muted); max-width: 400px; line-height: 1.5; font-size: 13.5px;">Click "Calculate Payoff Plan" to run the dynamic amortization compound interest simulation and view your debt-free schedule.</p>
+                            </div>
+                            
+                            <!-- Detailed Report Content (hidden by default) -->
+                            <div id="payoff-report-content" style="display: none;">
+                                <!-- KPI Summary Cards -->
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                                    <div class="stat-card" style="padding: 15px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2);">
+                                        <span style="font-size: 11px; text-transform: uppercase; color: var(--accent-green); letter-spacing: 0.5px; font-weight: 600;">Total Interest Saved</span>
+                                        <h2 id="payoff-saved-interest" style="margin: 8px 0 0 0; font-size: 24px; color: var(--text-primary); font-family: 'Outfit', sans-serif;">₹0</h2>
+                                    </div>
+                                    <div class="stat-card" style="padding: 15px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                        <span style="font-size: 11px; text-transform: uppercase; color: var(--accent-blue); letter-spacing: 0.5px; font-weight: 600;">Months Saved / Early payoff</span>
+                                        <h2 id="payoff-saved-months" style="margin: 8px 0 0 0; font-size: 24px; color: var(--text-primary); font-family: 'Outfit', sans-serif;">0 Months</h2>
+                                    </div>
+                                    <div class="stat-card" style="padding: 15px;">
+                                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Remaining Payoff Duration</span>
+                                        <h2 id="payoff-pay-duration" style="margin: 8px 0 0 0; font-size: 20px; color: var(--text-primary);">0 Months</h2>
+                                    </div>
+                                    <div class="stat-card" style="padding: 15px;">
+                                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Debt-Free Target Date</span>
+                                        <h2 id="payoff-debt-free-date" style="margin: 8px 0 0 0; font-size: 20px; color: var(--text-primary);">N/A</h2>
+                                    </div>
+                                </div>
+                                
+                                <!-- Paydown Guidance Instructions -->
+                                <div class="stat-card" style="padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--accent-orange);">
+                                    <h4 style="margin: 0 0 10px 0; color: var(--text-primary); font-size: 14px;">Payoff Action Plan</h4>
+                                    <div id="payoff-instructions" style="color: var(--text-muted); font-size: 13px; line-height: 1.6;">
+                                        <!-- Dynamically populated steps -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Amortization Schedule Table -->
+                                <div class="stat-card" style="padding: 20px;">
+                                    <h4 style="margin: 0 0 15px 0; color: var(--text-primary); font-size: 14px;">Month-by-Month Payoff Progress</h4>
+                                    <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                                        <table style="font-size: 12px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Month</th>
+                                                    <th class="number">Total EMI Paid</th>
+                                                    <th class="number">Prepayment</th>
+                                                    <th class="number">Interest Paid</th>
+                                                    <th class="number">Principal Paid</th>
+                                                    <th class="number">Remaining Debt</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="payoff-timeline-body">
+                                                <!-- Dynamic amortization rows -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>

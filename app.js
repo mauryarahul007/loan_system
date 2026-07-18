@@ -119,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearchGaps();
     initOpportunities();
     initScanner();
+    initPayoffPlanner();
     
     // Set current date
     const dateOpts = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -137,7 +138,8 @@ function initTabSwitching() {
         social: ["Social Listening Log", "Real consumer complaints and discussions extracted from Reddit, forums, and portals."],
         competitors: ["Competitor Gap Matrix", "Analysis of home loan features offered by main players in the Indian market."],
         search: ["Search Intent Gaps", "SEO keyword opportunities where existing content does not solve consumer doubts."],
-        opportunities: ["Opportunity Scoring (RICE)", "Prioritisation index for home loan features based on Reach, Impact, Confidence, and Effort."]
+        opportunities: ["Opportunity Scoring (RICE)", "Prioritisation index for home loan features based on Reach, Impact, Confidence, and Effort."],
+        payoff: ["Loan Payoff Planner", "Interactive acceleration strategies (Avalanche vs. Snowball) with prepayment compounding."]
     };
 
     menuButtons.forEach(btn => {
@@ -763,3 +765,298 @@ function classifySentiment(text) {
     }
     return "Discussion";
 }
+
+// --- 9. LOAN PAYOFF PLANNER CORE MODULE ---
+
+let plannerLoans = [
+    { id: 1, name: "SBI Home Loan", balance: 4500000, rate: 8.5, emi: 39000 }
+];
+
+function initPayoffPlanner() {
+    const nameInput = document.getElementById("payoff-loan-name");
+    const balanceInput = document.getElementById("payoff-loan-balance");
+    const rateInput = document.getElementById("payoff-loan-rate");
+    const emiInput = document.getElementById("payoff-loan-emi");
+    const addBtn = document.getElementById("payoff-add-loan-btn");
+    const calcBtn = document.getElementById("payoff-calculate-btn");
+    
+    // Add loan event listener
+    if (addBtn) {
+        addBtn.addEventListener("click", () => {
+            const name = nameInput.value.trim();
+            const balance = parseFloat(balanceInput.value);
+            const rate = parseFloat(rateInput.value);
+            const emi = parseFloat(emiInput.value);
+            
+            if (!name || isNaN(balance) || isNaN(rate) || isNaN(emi) || balance <= 0 || rate <= 0 || emi <= 0) {
+                alert("Please enter valid positive values for all loan fields.");
+                return;
+            }
+            
+            plannerLoans.push({
+                id: Date.now(),
+                name: name,
+                balance: balance,
+                rate: rate,
+                emi: emi
+            });
+            
+            renderPlannerLoans();
+            
+            // Clear inputs
+            nameInput.value = "";
+            balanceInput.value = "";
+            rateInput.value = "";
+            emiInput.value = "";
+        });
+    }
+    
+    // Calculate payoff plan event listener
+    if (calcBtn) {
+        calcBtn.addEventListener("click", () => {
+            if (plannerLoans.length === 0) {
+                alert("Please add at least one loan before generating a payoff plan.");
+                return;
+            }
+            
+            const extraMonthly = parseFloat(document.getElementById("payoff-extra-monthly").value) || 0;
+            const extraAnnual = parseFloat(document.getElementById("payoff-extra-annual").value) || 0;
+            const strategy = document.getElementById("payoff-strategy").value;
+            
+            // Calculate total minimum EMI required
+            const totalMinEMI = plannerLoans.reduce((sum, l) => sum + l.emi, 0);
+            
+            // Run simulations
+            const prepayPlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, strategy);
+            const baselinePlan = runPayoffSimulation(plannerLoans, 0, 0, strategy); // Prepayments = 0
+            
+            // Calculate differences
+            const interestSaved = Math.max(0, Math.round(baselinePlan.totalInterest - prepayPlan.totalInterest));
+            const monthsSaved = Math.max(0, baselinePlan.months - prepayPlan.months);
+            
+            // Formatter helper
+            const fmt = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+            
+            // Populate KPI values
+            document.getElementById("payoff-saved-interest").textContent = fmt(interestSaved);
+            document.getElementById("payoff-saved-months").textContent = `${monthsSaved} Months`;
+            document.getElementById("payoff-pay-duration").textContent = `${prepayPlan.months} Months (${(prepayPlan.months / 12).toFixed(1)} Years)`;
+            
+            // Calculate debt free target date
+            const freeDate = new Date();
+            freeDate.setMonth(freeDate.getMonth() + prepayPlan.months);
+            const dateOpts = { year: 'numeric', month: 'long' };
+            document.getElementById("payoff-debt-free-date").textContent = freeDate.toLocaleDateString('en-US', dateOpts);
+            
+            // Populate Step-by-Step Instructions
+            const sortedLoans = [...plannerLoans];
+            if (strategy === "avalanche") {
+                sortedLoans.sort((a, b) => b.rate - a.rate);
+            } else {
+                sortedLoans.sort((a, b) => a.balance - b.balance);
+            }
+            
+            const instrContainer = document.getElementById("payoff-instructions");
+            instrContainer.innerHTML = "";
+            
+            let stepNum = 1;
+            
+            // General instruction
+            let introDiv = document.createElement("div");
+            introDiv.className = "payoff-instruction-step";
+            let totalEMIStr = sortedLoans.map(x => `${x.name}: ${fmt(x.emi)}`).join(", ");
+            introDiv.innerHTML = `
+                <div class="payoff-step-num">${stepNum++}</div>
+                <div>
+                    <strong>Maintain Minimum Payments:</strong> Continue paying the required minimum EMI on all active loans monthly to avoid defaults (Total minimum payment: <strong>${fmt(totalMinEMI)}/mo</strong> - ${totalEMIStr}).
+                </div>
+            `;
+            instrContainer.appendChild(introDiv);
+            
+            // Target prioritizing instruction
+            let strategyText = strategy === "avalanche" ? "Highest Interest Rate First (Debt Avalanche)" : "Smallest Outstanding Balance First (Debt Snowball)";
+            let priorityDiv = document.createElement("div");
+            priorityDiv.className = "payoff-instruction-step";
+            priorityDiv.innerHTML = `
+                <div class="payoff-step-num">${stepNum++}</div>
+                <div>
+                    <strong>Prepay Target:</strong> Direct your extra <strong>${fmt(extraMonthly)}/mo</strong> prepayment savings (plus the optional annual bonus of <strong>${fmt(extraAnnual)}</strong>) entirely to <strong>${sortedLoans[0].name}</strong> (Interest Rate: ${sortedLoans[0].rate}%, Balance: ${fmt(sortedLoans[0].balance)}). This has been prioritized under the ${strategyText} strategy.
+                </div>
+            `;
+            instrContainer.appendChild(priorityDiv);
+            
+            // Rolldown steps
+            for (let i = 0; i < sortedLoans.length - 1; i++) {
+                let rolloverDiv = document.createElement("div");
+                rolloverDiv.className = "payoff-instruction-step";
+                let cumulativeEMI = sortedLoans.slice(0, i + 1).reduce((sum, x) => sum + x.emi, 0);
+                rolloverDiv.innerHTML = `
+                    <div class="payoff-step-num">${stepNum++}</div>
+                    <div>
+                        <strong>Rollover paydown:</strong> Once <strong>${sortedLoans[i].name}</strong> is cleared, roll its entire monthly EMI of <strong>${fmt(sortedLoans[i].emi)}</strong> plus your extra prepayment cash of <strong>${fmt(extraMonthly)}</strong> into <strong>${sortedLoans[i+1].name}</strong> (total payment: <strong>${fmt(cumulativeEMI + extraMonthly + sortedLoans[i+1].emi)}/mo</strong>).
+                    </div>
+                `;
+                instrContainer.appendChild(rolloverDiv);
+            }
+            
+            // Final completion step
+            let finalDiv = document.createElement("div");
+            finalDiv.className = "payoff-instruction-step";
+            finalDiv.innerHTML = `
+                <div class="payoff-step-num">${stepNum}</div>
+                <div>
+                    <strong>Debt Free Milestone:</strong> Follow this payoff priority plan to clear all outstanding debt in <strong>${prepayPlan.months} months</strong>, saving a total of <strong>${fmt(interestSaved)}</strong> in compound interest!
+                </div>
+            `;
+            instrContainer.appendChild(finalDiv);
+            
+            // Populate timeline schedule
+            const scheduleTable = document.getElementById("payoff-timeline-body");
+            scheduleTable.innerHTML = "";
+            
+            prepayPlan.timeline.forEach((item, index) => {
+                // Show rows in timeline. Limit list to prevent DOM bloat if payoff takes many months
+                if (index < 24 || index === prepayPlan.timeline.length - 1 || index % 12 === 0) {
+                    const row = document.createElement("tr");
+                    let dateMarker = new Date();
+                    dateMarker.setMonth(dateMarker.getMonth() + item.month);
+                    let label = dateMarker.toLocaleDateString('en-US', { year: '2-digit', month: 'short' });
+                    if (index === prepayPlan.timeline.length - 1) {
+                        label = `Final (Month ${item.month})`;
+                    } else if (index % 12 === 0 && index > 0) {
+                        label = `Yr ${(index/12).toFixed(0)} (${label})`;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${label}</td>
+                        <td class="number">${fmt(item.emiPaid)}</td>
+                        <td class="number" style="color: var(--accent-orange); font-weight: 500;">${fmt(item.prepayment)}</td>
+                        <td class="number" style="color: var(--accent-red);">${fmt(item.interest)}</td>
+                        <td class="number" style="color: var(--accent-green);">${fmt(item.principal)}</td>
+                        <td class="number" style="font-weight: 600;">${fmt(item.remainingDebt)}</td>
+                    `;
+                    scheduleTable.appendChild(row);
+                }
+            });
+            
+            // Show report panel
+            document.getElementById("payoff-empty-state").style.display = "none";
+            document.getElementById("payoff-report-content").style.display = "block";
+        });
+    }
+    
+    // Initial Render
+    renderPlannerLoans();
+}
+
+function renderPlannerLoans() {
+    const listContainer = document.getElementById("payoff-loans-list");
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = "";
+    
+    const fmt = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    
+    plannerLoans.forEach(loan => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td style="font-weight: 500;">${loan.name}</td>
+            <td>${fmt(loan.balance)}</td>
+            <td>${loan.rate}%</td>
+            <td>${fmt(loan.emi)}</td>
+            <td style="text-align: right;">
+                <button onclick="deletePlannerLoan(${loan.id})" class="plat-tag" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); color: var(--accent-red); font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Delete</button>
+            </td>
+        `;
+        listContainer.appendChild(tr);
+    });
+}
+
+// Global scope delete handler for inline onclick
+window.deletePlannerLoan = function(id) {
+    plannerLoans = plannerLoans.filter(l => l.id !== id);
+    renderPlannerLoans();
+};
+
+function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy) {
+    // Deep clone loans
+    let simLoans = loans.map(l => ({ ...l, currentBalance: l.balance }));
+    
+    // Sort strategy
+    if (strategy === "avalanche") {
+        simLoans.sort((a, b) => b.rate - a.rate);
+    } else {
+        simLoans.sort((a, b) => a.balance - b.balance);
+    }
+    
+    let monthlyTimeline = [];
+    let month = 0;
+    let totalInterestPaid = 0;
+    let totalEMIPaid = 0;
+    let totalPrepayments = 0;
+    
+    while (simLoans.some(l => l.currentBalance > 0) && month < 360) {
+        month++;
+        
+        let monthInterest = 0;
+        let monthEMIPaid = 0;
+        let monthPrepaymentPaid = 0;
+        
+        // 1. Accumulate Interest
+        simLoans.forEach(loan => {
+            if (loan.currentBalance > 0) {
+                let monthlyRate = (loan.rate / 12) / 100;
+                let interest = loan.currentBalance * monthlyRate;
+                loan.currentBalance += interest;
+                monthInterest += interest;
+            }
+        });
+        
+        // 2. Pay minimum EMIs on all active loans
+        simLoans.forEach(loan => {
+            if (loan.currentBalance > 0) {
+                let minPayment = Math.min(loan.emi, loan.currentBalance);
+                loan.currentBalance -= minPayment;
+                monthEMIPaid += minPayment;
+            }
+        });
+        
+        // 3. Prepayment budget
+        let leftoverPrepaymentBudget = extraMonthly;
+        if (extraAnnual > 0 && month % 12 === 0) {
+            leftoverPrepaymentBudget += extraAnnual;
+        }
+        
+        // 4. Pay extra toward target loan
+        simLoans.forEach(loan => {
+            if (loan.currentBalance > 0 && leftoverPrepaymentBudget > 0) {
+                let prepayAmount = Math.min(leftoverPrepaymentBudget, loan.currentBalance);
+                loan.currentBalance -= prepayAmount;
+                monthPrepaymentPaid += prepayAmount;
+                leftoverPrepaymentBudget -= prepayAmount;
+            }
+        });
+        
+        totalInterestPaid += monthInterest;
+        totalEMIPaid += monthEMIPaid;
+        totalPrepayments += monthPrepaymentPaid;
+        
+        let remainingDebt = simLoans.reduce((sum, l) => sum + l.currentBalance, 0);
+        
+        monthlyTimeline.push({
+            month: month,
+            emiPaid: monthEMIPaid,
+            prepayment: monthPrepaymentPaid,
+            interest: monthInterest,
+            principal: (monthEMIPaid + monthPrepaymentPaid) - monthInterest,
+            remainingDebt: remainingDebt
+        });
+    }
+    
+    return {
+        timeline: monthlyTimeline,
+        totalInterest: totalInterestPaid,
+        totalPaid: totalEMIPaid + totalPrepayments,
+        months: month
+    };
+};
