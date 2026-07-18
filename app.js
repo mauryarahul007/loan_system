@@ -763,14 +763,12 @@ function classifySentiment(text) {
     if (words.some(w => POSITIVES_SET.has(w))) {
         return "Appreciation";
     }
-    return "Discussion";
-}
-
-// --- 9. LOAN PAYOFF PLANNER CORE MODULE ---
+  // --- 9. LOAN PAYOFF PLANNER CORE MODULE ---
 
 let plannerLoans = [
     { id: 1, name: "SBI Home Loan", balance: 4500000, rate: 8.5, emi: 39000 }
 ];
+let editingLoanId = null;
 
 function initPayoffPlanner() {
     const nameInput = document.getElementById("payoff-loan-name");
@@ -793,13 +791,33 @@ function initPayoffPlanner() {
                 return;
             }
             
-            plannerLoans.push({
-                id: Date.now(),
-                name: name,
-                balance: balance,
-                rate: rate,
-                emi: emi
-            });
+            // Validate: EMI must be greater than monthly interest to prevent permanent balance growth
+            const monthlyInterest = balance * (rate / 12 / 100);
+            if (emi <= monthlyInterest) {
+                alert(`Monthly EMI (₹${emi.toLocaleString()}) must be greater than the initial monthly interest (₹${Math.round(monthlyInterest).toLocaleString()}) so the loan balance can decrease.`);
+                return;
+            }
+            
+            if (editingLoanId !== null) {
+                const loan = plannerLoans.find(l => l.id === editingLoanId);
+                if (loan) {
+                    loan.name = name;
+                    loan.balance = balance;
+                    loan.rate = rate;
+                    loan.emi = emi;
+                }
+                editingLoanId = null;
+                addBtn.textContent = "Add Loan";
+                addBtn.style.background = "";
+            } else {
+                plannerLoans.push({
+                    id: Date.now(),
+                    name: name,
+                    balance: balance,
+                    rate: rate,
+                    emi: emi
+                });
+            }
             
             renderPlannerLoans();
             
@@ -826,9 +844,9 @@ function initPayoffPlanner() {
             // Calculate total minimum EMI required
             const totalMinEMI = plannerLoans.reduce((sum, l) => sum + l.emi, 0);
             
-            // Run simulations
-            const prepayPlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, strategy);
-            const baselinePlan = runPayoffSimulation(plannerLoans, 0, 0, strategy); // Prepayments = 0
+            // Run simulations (optimized vs baseline)
+            const prepayPlan = runPayoffSimulation(plannerLoans, extraMonthly, extraAnnual, strategy, false);
+            const baselinePlan = runPayoffSimulation(plannerLoans, 0, 0, strategy, true);
             
             // Calculate differences
             const interestSaved = Math.max(0, Math.round(baselinePlan.totalInterest - prepayPlan.totalInterest));
@@ -842,7 +860,7 @@ function initPayoffPlanner() {
             document.getElementById("payoff-saved-months").textContent = `${monthsSaved} Months`;
             document.getElementById("payoff-pay-duration").textContent = `${prepayPlan.months} Months (${(prepayPlan.months / 12).toFixed(1)} Years)`;
             
-            // Calculate debt free target date
+            // Calculate target date
             const freeDate = new Date();
             freeDate.setMonth(freeDate.getMonth() + prepayPlan.months);
             const dateOpts = { year: 'numeric', month: 'long' };
@@ -893,7 +911,7 @@ function initPayoffPlanner() {
                 rolloverDiv.innerHTML = `
                     <div class="payoff-step-num">${stepNum++}</div>
                     <div>
-                        <strong>Rollover paydown:</strong> Once <strong>${sortedLoans[i].name}</strong> is cleared, roll its entire monthly EMI of <strong>${fmt(sortedLoans[i].emi)}</strong> plus your extra prepayment cash of <strong>${fmt(extraMonthly)}</strong> into <strong>${sortedLoans[i+1].name}</strong> (total payment: <strong>${fmt(cumulativeEMI + extraMonthly + sortedLoans[i+1].emi)}/mo</strong>).
+                        <strong>Rollover Paydown:</strong> Once <strong>${sortedLoans[i].name}</strong> is cleared, roll its entire monthly EMI of <strong>${fmt(sortedLoans[i].emi)}</strong> plus your extra prepayment cash of <strong>${fmt(extraMonthly)}</strong> into <strong>${sortedLoans[i+1].name}</strong> (total payment: <strong>${fmt(cumulativeEMI + extraMonthly + sortedLoans[i+1].emi)}/mo</strong>).
                     </div>
                 `;
                 instrContainer.appendChild(rolloverDiv);
@@ -915,7 +933,6 @@ function initPayoffPlanner() {
             scheduleTable.innerHTML = "";
             
             prepayPlan.timeline.forEach((item, index) => {
-                // Show rows in timeline. Limit list to prevent DOM bloat if payoff takes many months
                 if (index < 24 || index === prepayPlan.timeline.length - 1 || index % 12 === 0) {
                     const row = document.createElement("tr");
                     let dateMarker = new Date();
@@ -964,7 +981,8 @@ function renderPlannerLoans() {
             <td>${fmt(loan.balance)}</td>
             <td>${loan.rate}%</td>
             <td>${fmt(loan.emi)}</td>
-            <td style="text-align: right;">
+            <td style="text-align: right; white-space: nowrap;">
+                <button onclick="editPlannerLoan(${loan.id})" class="plat-tag" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139,92,246,0.2); color: var(--accent-purple); font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; margin-right: 6px;">Edit</button>
                 <button onclick="deletePlannerLoan(${loan.id})" class="plat-tag" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); color: var(--accent-red); font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Delete</button>
             </td>
         `;
@@ -975,10 +993,36 @@ function renderPlannerLoans() {
 // Global scope delete handler for inline onclick
 window.deletePlannerLoan = function(id) {
     plannerLoans = plannerLoans.filter(l => l.id !== id);
+    if (editingLoanId === id) {
+        editingLoanId = null;
+        const addBtn = document.getElementById("payoff-add-loan-btn");
+        if (addBtn) {
+            addBtn.textContent = "Add Loan";
+            addBtn.style.background = "";
+        }
+    }
     renderPlannerLoans();
 };
 
-function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy) {
+// Global scope edit handler for inline onclick
+window.editPlannerLoan = function(id) {
+    const loan = plannerLoans.find(l => l.id === id);
+    if (!loan) return;
+    
+    document.getElementById("payoff-loan-name").value = loan.name;
+    document.getElementById("payoff-loan-balance").value = loan.balance;
+    document.getElementById("payoff-loan-rate").value = loan.rate;
+    document.getElementById("payoff-loan-emi").value = loan.emi;
+    
+    editingLoanId = id;
+    const addBtn = document.getElementById("payoff-add-loan-btn");
+    if (addBtn) {
+        addBtn.textContent = "Update Loan";
+        addBtn.style.background = "linear-gradient(135deg, var(--accent-blue), var(--accent-purple))";
+    }
+};
+
+function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy, isBaseline = false) {
     // Deep clone loans
     let simLoans = loans.map(l => ({ ...l, currentBalance: l.balance }));
     
@@ -989,13 +1033,15 @@ function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy) {
         simLoans.sort((a, b) => a.balance - b.balance);
     }
     
+    let totalInitialEMI = loans.reduce((sum, l) => sum + l.emi, 0);
+    
     let monthlyTimeline = [];
     let month = 0;
     let totalInterestPaid = 0;
-    let totalEMIPaid = 0;
-    let totalPrepayments = 0;
+    let totalPaid = 0;
+    let maxSafetyLimit = 480; // 40 years cap
     
-    while (simLoans.some(l => l.currentBalance > 0) && month < 360) {
+    while (simLoans.some(l => l.currentBalance > 0) && month < maxSafetyLimit) {
         month++;
         
         let monthInterest = 0;
@@ -1021,25 +1067,30 @@ function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy) {
             }
         });
         
-        // 3. Prepayment budget
-        let leftoverPrepaymentBudget = extraMonthly;
-        if (extraAnnual > 0 && month % 12 === 0) {
-            leftoverPrepaymentBudget += extraAnnual;
+        // 3. Prepayment calculations (skip for baseline)
+        if (!isBaseline) {
+            // Constant monthly commitment budget rollover
+            let monthlyBudget = totalInitialEMI + extraMonthly;
+            if (extraAnnual > 0 && month % 12 === 0) {
+                monthlyBudget += extraAnnual;
+            }
+            
+            // Prepayment budget is whatever is remaining after minimum EMIs are paid
+            let leftoverPrepaymentBudget = Math.max(0, monthlyBudget - monthEMIPaid);
+            
+            // 4. Pay extra toward active loans sequentially
+            simLoans.forEach(loan => {
+                if (loan.currentBalance > 0 && leftoverPrepaymentBudget > 0) {
+                    let prepayAmount = Math.min(leftoverPrepaymentBudget, loan.currentBalance);
+                    loan.currentBalance -= prepayAmount;
+                    monthPrepaymentPaid += prepayAmount;
+                    leftoverPrepaymentBudget -= prepayAmount;
+                }
+            });
         }
         
-        // 4. Pay extra toward target loan
-        simLoans.forEach(loan => {
-            if (loan.currentBalance > 0 && leftoverPrepaymentBudget > 0) {
-                let prepayAmount = Math.min(leftoverPrepaymentBudget, loan.currentBalance);
-                loan.currentBalance -= prepayAmount;
-                monthPrepaymentPaid += prepayAmount;
-                leftoverPrepaymentBudget -= prepayAmount;
-            }
-        });
-        
         totalInterestPaid += monthInterest;
-        totalEMIPaid += monthEMIPaid;
-        totalPrepayments += monthPrepaymentPaid;
+        totalPaid += (monthEMIPaid + monthPrepaymentPaid);
         
         let remainingDebt = simLoans.reduce((sum, l) => sum + l.currentBalance, 0);
         
@@ -1056,7 +1107,7 @@ function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy) {
     return {
         timeline: monthlyTimeline,
         totalInterest: totalInterestPaid,
-        totalPaid: totalEMIPaid + totalPrepayments,
+        totalPaid: totalPaid,
         months: month
     };
-};
+}
