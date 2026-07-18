@@ -269,6 +269,34 @@ def analyze_sentiment(text):
     else:
         return "Discussion"
 
+def extract_competitor(text):
+    lower_text = text.lower()
+    mapping = {
+        "sbi": "SBI Home Loans",
+        "hdfc": "HDFC Bank",
+        "icici": "ICICI Bank",
+        "axis": "Axis Bank",
+        "lic": "LIC HFL",
+        "bajaj": "Bajaj Finserv",
+        "groww": "Groww",
+        "magicbricks": "MagicBricks",
+        "cleartax": "ClearTax",
+        "bankbazaar": "BankBazaar",
+        "paisabazaar": "Paisabazaar",
+        "piramal": "Piramal Finance",
+        "dhfl": "DHFL",
+        "idfc": "IDFC First Bank",
+        "canara": "Canara Bank",
+        "pnb": "PNB Housing",
+        "federal": "Federal Bank",
+        "tata capital": "Tata Capital",
+        "l&t": "L&T Housing Finance"
+    }
+    for key, name in mapping.items():
+        if key in lower_text:
+            return name
+    return None
+
 def run_scrapling_scan(existing_texts):
     print("Initiating Scrapling web scanner...")
     scraped_results = []
@@ -277,7 +305,8 @@ def run_scrapling_scan(existing_texts):
         "site:reddit.com/r/IndiaInvestments home loan prepayment complaint",
         "site:mouthshut.com home loan foreclosure penalty issues",
         "site:quora.com home loan processing fee gst hidden charges",
-        "home loan delayed documents bank complaint consumer forum India"
+        "home loan delayed documents bank complaint consumer forum India",
+        "home loan HDFC SBI ICICI Axis Piramal Canara bank complaint review India"
     ]
     
     try:
@@ -356,6 +385,11 @@ def run_scrapling_scan(existing_texts):
                                 elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                                     sentiment = "Complaint"
 
+                            competitor = extract_competitor(snippet)
+                            notes_str = f"Scraped from: {title[:40]}"
+                            if competitor:
+                                notes_str = f"Competitor: {competitor}. {notes_str}"
+
                             item = {
                                 "date": "2026-07-18",
                                 "platform": platform,
@@ -366,7 +400,7 @@ def run_scrapling_scan(existing_texts):
                                 "sentiment": sentiment,
                                 "severity": severity,
                                 "feature": feature,
-                                "notes": f"Scraped from: {title[:40]}"
+                                "notes": notes_str
                             }
                             
                             if not any(x["text"].strip().lower() == normalized_txt for x in scraped_results):
@@ -395,6 +429,9 @@ def run_scrapling_scan(existing_texts):
                     elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                         sentiment = "Complaint"
                 fallback_copy["sentiment"] = sentiment
+                comp_detected = extract_competitor(fallback_copy["text"])
+                if comp_detected:
+                    fallback_copy["notes"] = f"Competitor: {comp_detected}. {fallback_copy.get('notes', '')}"
                 final_results.append(fallback_copy)
                 existing_texts.add(normalized_fallback_text)
                 if len(final_results) >= 10:
@@ -415,6 +452,9 @@ def run_scrapling_scan(existing_texts):
                 elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                     sentiment = "Complaint"
             unique_item["sentiment"] = sentiment
+            comp_detected = extract_competitor(unique_item["text"])
+            if comp_detected:
+                unique_item["notes"] = f"Competitor: {comp_detected}. {unique_item.get('notes', '')}"
             final_results.append(unique_item)
             
     print(f"Scrape completed. Returning {len(final_results)} new unique issues.")
