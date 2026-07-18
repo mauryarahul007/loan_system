@@ -713,50 +713,41 @@ function initScanner() {
 }
 
 // 8. Text classifier for sentiment categories
+const DISPLEASURES_SET = new Set([
+    'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
+    'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
+]);
+const COMPLAINTS_SET = new Set([
+    'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
+    'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
+    'misleading', 'fees', 'refused', 'slowed'
+]);
+const QUERIES_SET = new Set([
+    'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
+    'calculate', 'guide', 'rules'
+]);
+const POSITIVES_SET = new Set([
+    'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
+    'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
+    'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
+    'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
+    'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
+]);
+
 function classifySentiment(text) {
     const lowerText = text.toLowerCase();
-    const negatives = new Set([
-        'complaint', 'issue', 'delay', 'disappointed', 'bad', 'worst', 'wrong', 'charge', 
-        'penalty', 'fail', 'mislead', 'hidden', 'relentless', 'spam', 'scam', 'error', 
-        'unhappy', 'displeasure', 'frustrated', 'confused', 'opacity', 'bureaucracy', 
-        'refuse', 'slow', 'hostage', 'dispute', 'ignore', 'worse', 'delayed', 'charges',
-        'penalties', 'disappointment', 'failing', 'misleading', 'fails', 'errors',
-        'refused', 'refuses', 'slowing', 'disputes', 'ignored', 'ignoring', 'conflict',
-        'conflicting', 'disappointing', 'displeased', 'worry', 'worried'
-    ]);
-    const positives = new Set([
-        'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
-        'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
-        'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
-        'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
-        'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
-    ]);
-    const displeasures = new Set([
-        'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
-        'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
-    ]);
-    const complaints = new Set([
-        'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
-        'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
-        'misleading', 'fees', 'refused', 'slowed'
-    ]);
-    const queries = new Set([
-        'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
-        'calculate', 'guide', 'rules'
-    ]);
-    
     const words = lowerText.split(/\s+/).map(w => w.replace(/[.,!?;:()"'']/g, ""));
     
-    if (words.some(w => displeasures.has(w))) {
+    if (words.some(w => DISPLEASURES_SET.has(w))) {
         return "Displeasure";
     }
-    if (words.some(w => complaints.has(w))) {
+    if (words.some(w => COMPLAINTS_SET.has(w))) {
         return "Complaint";
     }
-    if (words.some(w => queries.has(w)) || lowerText.includes("?") || lowerText.includes("how to")) {
+    if (words.some(w => QUERIES_SET.has(w)) || lowerText.includes("?") || lowerText.includes("how to")) {
         return "Query";
     }
-    if (words.some(w => positives.has(w))) {
+    if (words.some(w => POSITIVES_SET.has(w))) {
         return "Appreciation";
     }
     return "Discussion";

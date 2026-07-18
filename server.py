@@ -232,39 +232,39 @@ FALLBACK_COMPLAINTS = [
     }
 ]
 
+# Sentiment / Tone classification lexicon definitions
+DISPLEASURES_LEXICON = {
+    'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
+    'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
+}
+COMPLAINTS_LEXICON = {
+    'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
+    'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
+    'misleading', 'fees', 'refused', 'slowed'
+}
+QUERIES_LEXICON = {
+    'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
+    'calculate', 'guide', 'rules'
+}
+POSITIVES_LEXICON = {
+    'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
+    'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
+    'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
+    'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
+    'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
+}
+
 def analyze_sentiment(text):
     lower_text = text.lower()
-    
-    displeasures = {
-        'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
-        'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
-    }
-    complaints = {
-        'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
-        'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
-        'misleading', 'fees', 'refused', 'slowed'
-    }
-    queries = {
-        'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
-        'calculate', 'guide', 'rules'
-    }
-    positives = {
-        'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
-        'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
-        'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
-        'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
-        'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
-    }
-    
     words = [w.strip(".,!?;:()\"'") for w in lower_text.split()]
     
-    if any(w in displeasures for w in words):
+    if any(w in DISPLEASURES_LEXICON for w in words):
         return "Displeasure"
-    elif any(w in complaints for w in words):
+    elif any(w in COMPLAINTS_LEXICON for w in words):
         return "Complaint"
-    elif any(w in queries for w in words) or "?" in lower_text or "how to" in lower_text:
+    elif any(w in QUERIES_LEXICON for w in words) or "?" in lower_text or "how to" in lower_text:
         return "Query"
-    elif any(w in positives for w in words):
+    elif any(w in POSITIVES_LEXICON for w in words):
         return "Appreciation"
     else:
         return "Discussion"
