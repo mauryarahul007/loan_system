@@ -519,10 +519,8 @@ def load_existing_excel_texts():
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         # Force fresh content delivery by stripping conditional headers
-        if 'If-Modified-Since' in self.headers:
-            del self.headers['If-Modified-Since']
-        if 'If-None-Match' in self.headers:
-            del self.headers['If-None-Match']
+        self.headers.pop('If-Modified-Since', None)
+        self.headers.pop('If-None-Match', None)
         super().do_GET()
         
     def do_POST(self):

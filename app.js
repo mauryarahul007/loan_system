@@ -1027,11 +1027,7 @@ function runPayoffSimulation(loans, extraMonthly, extraAnnual, strategy, isBasel
     let simLoans = loans.map(l => ({ ...l, currentBalance: l.balance }));
     
     // Sort strategy
-    if (strategy === "avalanche") {
-        simLoans.sort((a, b) => b.rate - a.rate);
-    } else {
-        simLoans.sort((a, b) => a.balance - b.balance);
-    }
+    simLoans.sort((a, b) => strategy === "avalanche" ? b.rate - a.rate : a.balance - b.balance);
     
     let totalInitialEMI = loans.reduce((sum, l) => sum + l.emi, 0);
     
