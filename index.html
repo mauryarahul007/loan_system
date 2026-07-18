@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Loan Research Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>Loan Hub</h1>
+                    <span>Research Tracker</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <button class="menu-item active" data-tab="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                    <span>Dashboard</span>
+                </button>
+                <button class="menu-item" data-tab="social">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Social Listening</span>
+                </button>
+                <button class="menu-item" data-tab="competitors">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Competitor Gaps</span>
+                </button>
+                <button class="menu-item" data-tab="search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span>Search Intent</span>
+                </button>
+                <button class="menu-item" data-tab="opportunities">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span>RICE Prioritisation</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="user-avatar">IND</div>
+                    <div class="user-info">
+                        <h3>India Market</h3>
+                        <p>MVP Phase 1 & 2</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h2 id="page-title">Research Dashboard</h2>
+                    <p id="page-subtitle">Snapshot of validated market demand and white spaces.</p>
+                </div>
+                <div class="header-actions">
+                    <button id="scan-btn" class="btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small spinner-icon"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        <span id="scan-btn-text">Scan Web Complaints</span>
+                    </button>
+                    <div class="date-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg>
+                        <span id="current-date">July 18, 2026</span>
+                    </div>
+                </div>
+
+            </header>
+
+            <!-- Tab Contents -->
+            <div class="content-body">
+                
+                <!-- Tab: Dashboard -->
+                <section id="tab-dashboard" class="tab-pane active">
+                    <!-- Stat Cards Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span>Comments Logged</span>
+                                <div class="stat-icon purple">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="stat-comments-count">25</h3>
+                                <p>Target: 100+ for stable patterns</p>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 25%"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span>Competitors Audited</span>
+                                <div class="stat-icon blue">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="stat-competitors-count">8</h3>
+                                <p>Across banks, HFCs & Fintechs</p>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span>Keywords Mapped</span>
+                                <div class="stat-icon green">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="stat-keywords-count">16</h3>
+                                <p>High volume search intent gaps</p>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 80%"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span>Negative Sentiment</span>
+                                <div class="stat-icon red">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <h3 id="stat-sentiment-neg">76%</h3>
+                                <p>Strong validated consumer pain</p>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 76%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Graphs and Key Insights -->
+                    <div class="grid-two-col">
+                        <!-- Left Card: Sentiment & Core Metrics -->
+                        <div class="dashboard-panel">
+                            <h2>Sentiment Split</h2>
+                            <div class="chart-container">
+                                <div class="donut-chart-wrapper">
+                                    <svg class="donut-chart" viewBox="0 0 100 100">
+                                        <!-- Donut slices generated via JS -->
+                                        <circle cx="50" cy="50" r="40" class="base-circle"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-negative" id="donut-slice-neg"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-neutral" id="donut-slice-neu"></circle>
+                                    </svg>
+                                    <div class="donut-label">
+                                        <span id="donut-label-pct">76%</span>
+                                        <span class="donut-sublabel">Negative</span>
+                                    </div>
+                                </div>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <span class="dot red"></span>
+                                        <span class="legend-text">Negative (<span id="legend-neg-count">19</span>)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="dot gray"></span>
+                                        <span class="legend-text">Neutral (<span id="legend-neu-count">6</span>)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="dot green"></span>
+                                        <span class="legend-text">Positive (0)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Card: Top Items Summary -->
+                        <div class="dashboard-panel">
+                            <h2>Market Snapshot</h2>
+                            <div class="snapshot-list">
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Highest Priority Theme</div>
+                                    <div class="snapshot-val gradient-text" id="snap-top-theme">Tax benefit confusion</div>
+                                    <div class="snapshot-subtext">Priority Score: <strong id="snap-top-theme-score">14.0</strong> (Mentions & Severity)</div>
+                                </div>
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Top Scored Opportunity</div>
+                                    <div class="snapshot-val gradient-text" id="snap-top-opp">All-in cost / hidden-charges calculator</div>
+                                    <div class="snapshot-subtext">RICE Score: <strong id="snap-top-opp-score">40.0</strong> (High demand / low implementation effort)</div>
+                                </div>
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Unaddressed White Spaces</div>
+                                    <div class="snapshot-val" id="snap-white-spaces">14 Features</div>
+                                    <div class="snapshot-subtext">with HIGH opportunity flags (0% or 10% market coverage)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Themes list -->
+                    <div class="dashboard-panel full-width">
+                        <h2>Pain-Point Themes & Severity</h2>
+                        <div class="theme-bars-container" id="theme-bars">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab: Social Listening -->
+                <section id="tab-social" class="tab-pane">
+                    <div class="filter-bar">
+                        <div class="search-input-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="social-search" placeholder="Search consumer statements (e.g. prepayment, tax, HDFC)...">
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="social-filter-theme">
+                                <option value="">All Themes</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="social-filter-sentiment">
+                                <option value="">All Sentiments</option>
+                                <option value="Negative">Negative</option>
+                                <option value="Neutral">Neutral</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="social-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Platform</th>
+                                    <th>Source / Category</th>
+                                    <th>Consumer Paraphrase</th>
+                                    <th>Theme</th>
+                                    <th>Sentiment</th>
+                                    <th>Severity</th>
+                                    <th>Implied Feature / Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="social-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Competitor Audit -->
+                <section id="tab-competitors" class="tab-pane">
+                    <div class="intro-alert info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-med"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <div>
+                            <strong>Market White Space Flagged:</strong> Competitors cover basic calculators (e.g., standard EMI) at 100%. However, critical areas like **prepayment simulation, balance transfer costs, and foreclosure rights** have near 0% coverage.
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="matrix-table">
+                            <thead>
+                                <tr id="matrix-header-row">
+                                    <th>A-to-Z Feature / Content Area</th>
+                                    <!-- Competitor names added via JS -->
+                                    <th>Market Coverage</th>
+                                    <th>Opportunity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-table-body">
+                                <!-- Feature rows populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Search Gaps -->
+                <section id="tab-search" class="tab-pane">
+                    <div class="filter-bar">
+                        <div class="search-input-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="search-gap-search" placeholder="Search keywords...">
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Search Query / Keyword</th>
+                                    <th class="number">Monthly Search Volume</th>
+                                    <th>Intent Type</th>
+                                    <th class="number">Competitor Answer Quality (1-5)</th>
+                                    <th class="number">Gap Score</th>
+                                    <th>Proposed Solution Format</th>
+                                </tr>
+                            </thead>
+                            <tbody id="search-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Opportunities -->
+                <section id="tab-opportunities" class="tab-pane">
+                    <div class="opportunity-controls">
+                        <span>Click headers to sort RICE list.</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="opps-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable active" data-sort="name">Opportunity / Feature to Build</th>
+                                    <th class="sortable number" data-sort="reach">Reach (1-5)</th>
+                                    <th class="sortable number" data-sort="impact">Impact (1-5)</th>
+                                    <th class="sortable number" data-sort="confidence">Confidence (1-5)</th>
+                                    <th class="sortable number" data-sort="effort">Effort (1-5)</th>
+                                    <th class="sortable number" data-sort="rice">RICE Score</th>
+                                    <th>Priority</th>
+                                    <th>Evidence / Linked Theme</th>
+                                </tr>
+                            </thead>
+                            <tbody id="opps-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
