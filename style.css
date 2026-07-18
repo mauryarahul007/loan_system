@@ -1030,6 +1030,22 @@ th.sortable.active::after {
     gap: 12px;
 }
 
+.payoff-instruction-step.clickable-step {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.payoff-instruction-step.clickable-step:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.payoff-instruction-step.clickable-step.active {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
 .payoff-step-num {
     background: var(--accent-orange);
     color: white;
