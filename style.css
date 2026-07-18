@@ -430,30 +430,48 @@ h1, h2, h3, h4, h5, h6 {
     stroke-width: 8;
 }
 
-.slice-negative {
+.slice-displeasure {
     fill: none;
     stroke: var(--accent-red);
     stroke-width: 8;
     stroke-dasharray: 251.2;
-    stroke-dashoffset: 251.2; /* Animates via JS */
+    stroke-dashoffset: 251.2;
     transition: stroke-dashoffset 1s ease-out;
 }
 
-.slice-neutral {
+.slice-complaint {
+    fill: none;
+    stroke: var(--accent-orange);
+    stroke-width: 8;
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 251.2;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+.slice-query {
+    fill: none;
+    stroke: var(--accent-blue);
+    stroke-width: 8;
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 251.2;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+.slice-discussion {
     fill: none;
     stroke: var(--text-muted);
     stroke-width: 8;
     stroke-dasharray: 251.2;
-    stroke-dashoffset: 251.2; /* Animates via JS */
+    stroke-dashoffset: 251.2;
     transition: stroke-dashoffset 1s ease-out;
 }
 
-.slice-positive {
+.slice-appreciation {
     fill: none;
     stroke: var(--accent-green);
     stroke-width: 8;
     stroke-dasharray: 251.2;
-    stroke-dashoffset: 251.2; /* Animates via JS */
+    stroke-dashoffset: 251.2;
     transition: stroke-dashoffset 1s ease-out;
 }
 
@@ -504,6 +522,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dot.red { background-color: var(--accent-red); }
+.dot.orange { background-color: var(--accent-orange); }
+.dot.blue { background-color: var(--accent-blue); }
 .dot.gray { background-color: var(--text-muted); }
 .dot.green { background-color: var(--accent-green); }
 
@@ -801,6 +821,12 @@ th.number, td.number {
     background-color: rgba(255, 255, 255, 0.05);
     color: var(--text-secondary);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge.appr {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--accent-green);
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 /* Info alerts box */

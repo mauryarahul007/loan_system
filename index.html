@@ -163,9 +163,11 @@
                                     <svg class="donut-chart" viewBox="0 0 100 100">
                                         <!-- Donut slices generated via JS -->
                                         <circle cx="50" cy="50" r="40" class="base-circle"></circle>
-                                        <circle cx="50" cy="50" r="40" class="slice-negative" id="donut-slice-neg"></circle>
-                                        <circle cx="50" cy="50" r="40" class="slice-neutral" id="donut-slice-neu"></circle>
-                                        <circle cx="50" cy="50" r="40" class="slice-positive" id="donut-slice-pos"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-displeasure" id="donut-slice-disp"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-complaint" id="donut-slice-comp"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-query" id="donut-slice-query"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-discussion" id="donut-slice-disc"></circle>
+                                        <circle cx="50" cy="50" r="40" class="slice-appreciation" id="donut-slice-appr"></circle>
                                     </svg>
                                     <div class="donut-label">
                                         <span id="donut-label-pct">76%</span>
@@ -175,15 +177,23 @@
                                 <div class="chart-legend">
                                     <div class="legend-item">
                                         <span class="dot red"></span>
-                                        <span class="legend-text">Negative (<span id="legend-neg-count">19</span>)</span>
+                                        <span class="legend-text">Displeasure (<span id="legend-disp-count">0</span>)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="dot orange"></span>
+                                        <span class="legend-text">Complaint (<span id="legend-comp-count">0</span>)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="dot blue"></span>
+                                        <span class="legend-text">Query (<span id="legend-query-count">0</span>)</span>
                                     </div>
                                     <div class="legend-item">
                                         <span class="dot gray"></span>
-                                        <span class="legend-text">Neutral (<span id="legend-neu-count">6</span>)</span>
+                                        <span class="legend-text">Discussion (<span id="legend-disc-count">0</span>)</span>
                                     </div>
                                     <div class="legend-item">
                                         <span class="dot green"></span>
-                                        <span class="legend-text">Positive (<span id="legend-pos-count">0</span>)</span>
+                                        <span class="legend-text">Appreciation (<span id="legend-appr-count">0</span>)</span>
                                     </div>
                                 </div>
                             </div>
@@ -236,9 +246,12 @@
                         </div>
                         <div class="select-wrapper">
                             <select id="social-filter-sentiment">
-                                <option value="">All Sentiments</option>
-                                <option value="Negative">Negative</option>
-                                <option value="Neutral">Neutral</option>
+                                <option value="">All Categories</option>
+                                <option value="Displeasure">Displeasure</option>
+                                <option value="Complaint">Complaint</option>
+                                <option value="Query">Query</option>
+                                <option value="Discussion">Discussion</option>
+                                <option value="Appreciation">Appreciation</option>
                             </select>
                         </div>
                     </div>

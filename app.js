@@ -96,6 +96,11 @@ const opportunityScoring = [
 // --- APP CORE CONTROLLER ---
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Classify baseline logs into 5-way sentiment categories
+    socialLog.forEach(item => {
+        item.sentiment = classifySentiment(item.text);
+    });
+    
     initTabSwitching();
     initDashboard();
     initSocialLog();
@@ -184,10 +189,14 @@ function initDashboard() {
     const totalCompetitors = competitors.length;
     const totalKeywords = searchIntentGaps.length;
     
-    const negativeCount = socialLog.filter(item => item.sentiment === "Negative").length;
-    const neutralCount = socialLog.filter(item => item.sentiment === "Neutral").length;
-    const positiveCount = socialLog.filter(item => item.sentiment === "Positive").length;
-    const negativePct = Math.round((negativeCount / totalComments) * 100);
+    const displeasureCount = socialLog.filter(item => item.sentiment === "Displeasure").length;
+    const complaintCount = socialLog.filter(item => item.sentiment === "Complaint").length;
+    const queryCount = socialLog.filter(item => item.sentiment === "Query").length;
+    const discussionCount = socialLog.filter(item => item.sentiment === "Discussion").length;
+    const appreciationCount = socialLog.filter(item => item.sentiment === "Appreciation").length;
+    
+    // Calculate total pain percentage (Displeasure + Complaint)
+    const negativePct = Math.round(((displeasureCount + complaintCount) / totalComments) * 100);
     
     // Set Stat boxes
     document.getElementById("stat-comments-count").textContent = totalComments;
@@ -222,10 +231,12 @@ function initDashboard() {
     document.getElementById("snap-white-spaces").textContent = `${whiteSpaceCount} Features`;
     
     // Populate Donut Legend numbers
-    document.getElementById("legend-neg-count").textContent = negativeCount;
-    document.getElementById("legend-neu-count").textContent = neutralCount;
-    const legendPos = document.getElementById("legend-pos-count");
-    if (legendPos) legendPos.textContent = positiveCount;
+    document.getElementById("legend-disp-count").textContent = displeasureCount;
+    document.getElementById("legend-comp-count").textContent = complaintCount;
+    document.getElementById("legend-query-count").textContent = queryCount;
+    document.getElementById("legend-disc-count").textContent = discussionCount;
+    document.getElementById("legend-appr-count").textContent = appreciationCount;
+    
     document.getElementById("donut-label-pct").textContent = `${negativePct}%`;
     
     // Populate Theme Bars in dashboard panel
@@ -258,40 +269,60 @@ function initDashboard() {
 // Chart animations (stroke offset calculation and bar loading)
 function animateCharts() {
     const totalComments = socialLog.length;
-    const negativeCount = socialLog.filter(item => item.sentiment === "Negative").length;
-    const neutralCount = socialLog.filter(item => item.sentiment === "Neutral").length;
-    const positiveCount = socialLog.filter(item => item.sentiment === "Positive").length;
+    const displeasureCount = socialLog.filter(item => item.sentiment === "Displeasure").length;
+    const complaintCount = socialLog.filter(item => item.sentiment === "Complaint").length;
+    const queryCount = socialLog.filter(item => item.sentiment === "Query").length;
+    const discussionCount = socialLog.filter(item => item.sentiment === "Discussion").length;
+    const appreciationCount = socialLog.filter(item => item.sentiment === "Appreciation").length;
     
-    const negPct = negativeCount / totalComments;
-    const neuPct = neutralCount / totalComments;
-    const posPct = positiveCount / totalComments;
+    const dispPct = displeasureCount / totalComments;
+    const compPct = complaintCount / totalComments;
+    const queryPct = queryCount / totalComments;
+    const discPct = discussionCount / totalComments;
+    const apprPct = appreciationCount / totalComments;
     
     // Circumference = 2 * PI * r = 2 * 3.14159 * 40 = 251.2
     const totalCircumference = 251.2;
     
-    const negOffset = totalCircumference - (negPct * totalCircumference);
+    const dispOffset = totalCircumference - (dispPct * totalCircumference);
+    const compOffset = totalCircumference - ((dispPct + compPct) * totalCircumference);
+    const queryOffset = totalCircumference - ((dispPct + compPct + queryPct) * totalCircumference);
+    const discOffset = totalCircumference - ((dispPct + compPct + queryPct + discPct) * totalCircumference);
+    const apprOffset = totalCircumference - ((dispPct + compPct + queryPct + discPct + apprPct) * totalCircumference);
     
-    const neuStrokeDash = neuPct * totalCircumference;
-    const neuOffset = totalCircumference - ((negPct + neuPct) * totalCircumference);
+    // Slice Displeasure
+    const sliceDisp = document.getElementById("donut-slice-disp");
+    if (sliceDisp) {
+        sliceDisp.style.strokeDasharray = `${totalCircumference}`;
+        sliceDisp.style.strokeDashoffset = `${dispOffset}`;
+    }
     
-    const posStrokeDash = posPct * totalCircumference;
-    const posOffset = totalCircumference - ((negPct + neuPct + posPct) * totalCircumference);
+    // Slice Complaint
+    const sliceComp = document.getElementById("donut-slice-comp");
+    if (sliceComp) {
+        sliceComp.style.strokeDasharray = `${totalCircumference}`;
+        sliceComp.style.strokeDashoffset = `${compOffset}`;
+    }
     
-    // Slice Negative
-    const sliceNeg = document.getElementById("donut-slice-neg");
-    sliceNeg.style.strokeDasharray = `${totalCircumference}`;
-    sliceNeg.style.strokeDashoffset = `${negOffset}`;
+    // Slice Query
+    const sliceQuery = document.getElementById("donut-slice-query");
+    if (sliceQuery) {
+        sliceQuery.style.strokeDasharray = `${totalCircumference}`;
+        sliceQuery.style.strokeDashoffset = `${queryOffset}`;
+    }
     
-    // Slice Neutral
-    const sliceNeu = document.getElementById("donut-slice-neu");
-    sliceNeu.style.strokeDasharray = `${totalCircumference}`;
-    sliceNeu.style.strokeDashoffset = `${neuOffset}`;
+    // Slice Discussion
+    const sliceDisc = document.getElementById("donut-slice-disc");
+    if (sliceDisc) {
+        sliceDisc.style.strokeDasharray = `${totalCircumference}`;
+        sliceDisc.style.strokeDashoffset = `${discOffset}`;
+    }
     
-    // Slice Positive
-    const slicePos = document.getElementById("donut-slice-pos");
-    if (slicePos) {
-        slicePos.style.strokeDasharray = `${totalCircumference}`;
-        slicePos.style.strokeDashoffset = `${posOffset}`;
+    // Slice Appreciation
+    const sliceAppr = document.getElementById("donut-slice-appr");
+    if (sliceAppr) {
+        sliceAppr.style.strokeDasharray = `${totalCircumference}`;
+        sliceAppr.style.strokeDashoffset = `${apprOffset}`;
     }
     
     // Animate Theme priority bars
@@ -356,7 +387,11 @@ function initSocialLog() {
             }
             
             // Format Sentiment Badge
-            const sentClass = item.sentiment === "Negative" ? "badge neg" : "badge neu";
+            let sentClass = "badge neu";
+            if (item.sentiment === "Displeasure") sentClass = "badge neg";
+            else if (item.sentiment === "Complaint") sentClass = "badge med";
+            else if (item.sentiment === "Query") sentClass = "badge p2";
+            else if (item.sentiment === "Appreciation") sentClass = "badge appr";
             
             // Format Severity stars
             let severityStars = "";
@@ -675,4 +710,54 @@ function initScanner() {
             }, 3000);
         }
     });
+}
+
+// 8. Text classifier for sentiment categories
+function classifySentiment(text) {
+    const lowerText = text.toLowerCase();
+    const negatives = new Set([
+        'complaint', 'issue', 'delay', 'disappointed', 'bad', 'worst', 'wrong', 'charge', 
+        'penalty', 'fail', 'mislead', 'hidden', 'relentless', 'spam', 'scam', 'error', 
+        'unhappy', 'displeasure', 'frustrated', 'confused', 'opacity', 'bureaucracy', 
+        'refuse', 'slow', 'hostage', 'dispute', 'ignore', 'worse', 'delayed', 'charges',
+        'penalties', 'disappointment', 'failing', 'misleading', 'fails', 'errors',
+        'refused', 'refuses', 'slowing', 'disputes', 'ignored', 'ignoring', 'conflict',
+        'conflicting', 'disappointing', 'displeased', 'worry', 'worried'
+    ]);
+    const positives = new Set([
+        'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
+        'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
+        'trust', 'love', 'happy', 'savings', 'benefits', 'simplest', 'resolved', 'resolves',
+        'cleared', 'clears', 'transparently', 'satisfaction', 'positive', 'perfect',
+        'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
+    ]);
+    const displeasures = new Set([
+        'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
+        'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
+    ]);
+    const complaints = new Set([
+        'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
+        'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
+        'misleading', 'fees', 'refused', 'slowed'
+    ]);
+    const queries = new Set([
+        'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
+        'calculate', 'guide', 'rules'
+    ]);
+    
+    const words = lowerText.split(/\s+/).map(w => w.replace(/[.,!?;:()"'']/g, ""));
+    
+    if (words.some(w => displeasures.has(w))) {
+        return "Displeasure";
+    }
+    if (words.some(w => complaints.has(w))) {
+        return "Complaint";
+    }
+    if (words.some(w => queries.has(w)) || lowerText.includes("?") || lowerText.includes("how to")) {
+        return "Query";
+    }
+    if (words.some(w => positives.has(w))) {
+        return "Appreciation";
+    }
+    return "Discussion";
 }

@@ -235,17 +235,19 @@ FALLBACK_COMPLAINTS = [
 def analyze_sentiment(text):
     lower_text = text.lower()
     
-    # Lexicon lists
-    negatives = {
-        'complaint', 'issue', 'delay', 'disappointed', 'bad', 'worst', 'wrong', 'charge', 
-        'penalty', 'fail', 'mislead', 'hidden', 'relentless', 'spam', 'scam', 'error', 
-        'unhappy', 'displeasure', 'frustrated', 'confused', 'opacity', 'bureaucracy', 
-        'refuse', 'slow', 'hostage', 'dispute', 'ignore', 'worse', 'delayed', 'charges',
-        'penalties', 'disappointment', 'failing', 'misleading', 'fails', 'errors',
-        'refused', 'refuses', 'slowing', 'disputes', 'ignored', 'ignoring', 'conflict',
-        'conflicting', 'disappointing', 'displeased', 'worry', 'worried'
+    displeasures = {
+        'worst', 'disappointed', 'bad', 'frustrated', 'unhappy', 'displeasure', 'scam', 
+        'relentless', 'spam', 'terrible', 'useless', 'horrible', 'annoyed', 'angry'
     }
-    
+    complaints = {
+        'charge', 'penalty', 'delay', 'fail', 'wrong', 'hidden', 'error', 'refuse', 'slow', 
+        'hostage', 'dispute', 'ignore', 'delayed', 'charges', 'penalties', 'failing', 
+        'misleading', 'fees', 'refused', 'slowed'
+    }
+    queries = {
+        'how', 'does', 'is it', 'can', 'what', 'where', 'why', 'query', 'request', 'know', 
+        'calculate', 'guide', 'rules'
+    }
     positives = {
         'satisfied', 'good', 'great', 'easy', 'excellent', 'helpful', 'fast', 'quick', 
         'recommend', 'resolved', 'save', 'benefit', 'simple', 'clear', 'transparent', 
@@ -254,38 +256,18 @@ def analyze_sentiment(text):
         'perfection', 'smooth', 'smoothly', 'trusted', 'trustworthy'
     }
     
-    negations = {'no', 'not', 'never', 'cannot', 'cant', 'didnt', 'dont', 'neither', 'nor', 'wont', 'lack'}
+    words = [w.strip(".,!?;:()\"'") for w in lower_text.split()]
     
-    score = 0
-    words = lower_text.split()
-    
-    for idx, word in enumerate(words):
-        clean_word = word.strip(".,!?;:()\"'")
-        
-        word_score = 0
-        if clean_word in negatives:
-            word_score = -1
-        elif clean_word in positives:
-            word_score = 1
-            
-        if word_score != 0:
-            negated = False
-            for lookback in range(1, 3):
-                if idx - lookback >= 0:
-                    prev_word = words[idx - lookback].strip(".,!?;:()\"'")
-                    if prev_word in negations:
-                        negated = True
-                        break
-            if negated:
-                word_score = -word_score
-            score += word_score
-            
-    if score < 0:
-        return "Negative"
-    elif score > 0:
-        return "Positive"
+    if any(w in displeasures for w in words):
+        return "Displeasure"
+    elif any(w in complaints for w in words):
+        return "Complaint"
+    elif any(w in queries for w in words) or "?" in lower_text or "how to" in lower_text:
+        return "Query"
+    elif any(w in positives for w in words):
+        return "Appreciation"
     else:
-        return "Neutral"
+        return "Discussion"
 
 def run_scrapling_scan(existing_texts):
     print("Initiating Scrapling web scanner...")
@@ -397,7 +379,6 @@ def run_scrapling_scan(existing_texts):
         for fallback in FALLBACK_COMPLAINTS:
             normalized_fallback_text = fallback["text"].strip().lower()
             if normalized_fallback_text not in existing_texts:
-                # Dynamically analyze sentiment
                 fallback_copy = fallback.copy()
                 fallback_copy["sentiment"] = analyze_sentiment(fallback_copy["text"])
                 final_results.append(fallback_copy)
