@@ -517,6 +517,14 @@ def load_existing_excel_texts():
     return texts
 
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # Force fresh content delivery by stripping conditional headers
+        if 'If-Modified-Since' in self.headers:
+            del self.headers['If-Modified-Since']
+        if 'If-None-Match' in self.headers:
+            del self.headers['If-None-Match']
+        super().do_GET()
+        
     def do_POST(self):
         if self.path == "/api/scan":
             try:
