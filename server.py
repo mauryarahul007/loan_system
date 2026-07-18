@@ -349,6 +349,13 @@ def run_scrapling_scan(existing_texts):
                                 feature = "Advanced EMI calculator"
                                 severity = 3
                             
+                            sentiment = analyze_sentiment(snippet)
+                            if sentiment == "Discussion" and theme != "Other":
+                                if theme in ["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"]:
+                                    sentiment = "Query"
+                                elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
+                                    sentiment = "Complaint"
+
                             item = {
                                 "date": "2026-07-18",
                                 "platform": platform,
@@ -356,7 +363,7 @@ def run_scrapling_scan(existing_texts):
                                 "text": snippet[:200] + "..." if len(snippet) > 200 else snippet,
                                 "theme": theme,
                                 "pain": "Yes",
-                                "sentiment": analyze_sentiment(snippet),
+                                "sentiment": sentiment,
                                 "severity": severity,
                                 "feature": feature,
                                 "notes": f"Scraped from: {title[:40]}"
@@ -380,7 +387,14 @@ def run_scrapling_scan(existing_texts):
             normalized_fallback_text = fallback["text"].strip().lower()
             if normalized_fallback_text not in existing_texts:
                 fallback_copy = fallback.copy()
-                fallback_copy["sentiment"] = analyze_sentiment(fallback_copy["text"])
+                sentiment = analyze_sentiment(fallback_copy["text"])
+                theme = fallback_copy["theme"]
+                if sentiment == "Discussion" and theme != "Other":
+                    if theme in ["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"]:
+                        sentiment = "Query"
+                    elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
+                        sentiment = "Complaint"
+                fallback_copy["sentiment"] = sentiment
                 final_results.append(fallback_copy)
                 existing_texts.add(normalized_fallback_text)
                 if len(final_results) >= 10:
@@ -393,7 +407,14 @@ def run_scrapling_scan(existing_texts):
             base_item = FALLBACK_COMPLAINTS[i % len(FALLBACK_COMPLAINTS)]
             unique_item = base_item.copy()
             unique_item["text"] = f"{unique_item['text']} (Ref: Rescan #{i+1})"
-            unique_item["sentiment"] = analyze_sentiment(unique_item["text"])
+            sentiment = analyze_sentiment(unique_item["text"])
+            theme = unique_item["theme"]
+            if sentiment == "Discussion" and theme != "Other":
+                if theme in ["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"]:
+                    sentiment = "Query"
+                elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
+                    sentiment = "Complaint"
+            unique_item["sentiment"] = sentiment
             final_results.append(unique_item)
             
     print(f"Scrape completed. Returning {len(final_results)} new unique issues.")
