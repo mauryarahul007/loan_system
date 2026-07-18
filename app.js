@@ -773,6 +773,7 @@ let plannerLoans = [
 ];
 let editingLoanId = null;
 let payoffChartInstance = null;
+let payoffAllocationChartInstance = null;
 
 function convertToIndianWords(value) {
     if (isNaN(value) || value <= 0) return "";
@@ -937,6 +938,10 @@ function initPayoffPlanner() {
             const extraAnnual = parseFloat(document.getElementById("payoff-extra-annual").value.replace(/,/g, '')) || 0;
             const strategy = document.getElementById("payoff-strategy").value;
             
+            // Pre-sort loans for consistent instructions and charts
+            const sortedLoans = [...plannerLoans];
+            sortedLoans.sort((a, b) => strategy === "avalanche" ? b.rate - a.rate : a.balance - b.balance);
+            
             // Calculate total minimum EMI required
             const totalMinEMI = plannerLoans.reduce((sum, l) => sum + l.emi, 0);
             
@@ -1089,13 +1094,122 @@ function initPayoffPlanner() {
                 console.error("Failed to render payoff timeline chart:", err);
             }
             
-            // Populate Step-by-Step Instructions
-            const sortedLoans = [...plannerLoans];
-            if (strategy === "avalanche") {
-                sortedLoans.sort((a, b) => b.rate - a.rate);
-            } else {
-                sortedLoans.sort((a, b) => a.balance - b.balance);
+            // Build budget allocation datasets
+            try {
+                const labelsAllocation = [];
+                const loanSeries = sortedLoans.map(loan => ({
+                    label: loan.name,
+                    data: []
+                }));
+                
+                for (let step = 0; step < sortedLoans.length; step++) {
+                    if (step === 0) {
+                        labelsAllocation.push("Initial Phase");
+                    } else {
+                        labelsAllocation.push(`Post ${sortedLoans[step - 1].name}`);
+                    }
+                    
+                    for (let i = 0; i < sortedLoans.length; i++) {
+                        let series = loanSeries.find(s => s.label === sortedLoans[i].name);
+                        if (i < step) {
+                            series.data.push(0);
+                        } else if (i === step) {
+                            let prevEMIsSum = sortedLoans.slice(0, step).reduce((sum, x) => sum + x.emi, 0);
+                            series.data.push(sortedLoans[i].emi + prevEMIsSum + extraMonthly);
+                        } else {
+                            series.data.push(sortedLoans[i].emi);
+                        }
+                    }
+                }
+                
+                const colors = [
+                    { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.4)' },
+                    { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.4)' },
+                    { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.4)' },
+                    { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.4)' },
+                    { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.4)' }
+                ];
+                
+                const datasetsAllocation = loanSeries.map((series, idx) => {
+                    const color = colors[idx % colors.length];
+                    return {
+                        label: series.label,
+                        data: series.data,
+                        borderColor: color.border,
+                        backgroundColor: color.bg,
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    };
+                });
+                
+                const ctxAlloc = document.getElementById("payoff-allocation-chart").getContext("2d");
+                if (payoffAllocationChartInstance) {
+                    payoffAllocationChartInstance.destroy();
+                }
+                
+                payoffAllocationChartInstance = new Chart(ctxAlloc, {
+                    type: 'bar',
+                    data: {
+                        labels: labelsAllocation,
+                        datasets: datasetsAllocation
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "'Inter', sans-serif", size: 10 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#e2e8f0',
+                                bodyColor: '#94a3b8',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.x !== null) {
+                                            label += fmt(context.parsed.x);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: { family: "'Inter', sans-serif", size: 10 },
+                                    callback: function(value) {
+                                        if (value >= 100000) return '₹' + (value / 100000).toFixed(0) + ' L';
+                                        if (value >= 1000) return '₹' + (value / 1000).toFixed(0) + ' K';
+                                        return '₹' + value;
+                                    }
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { color: '#e2e8f0', font: { family: "'Inter', sans-serif", size: 10 } }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to render payoff budget allocation chart:", err);
             }
+            
+            // Populate Step-by-Step Instructions
             
             const instrContainer = document.getElementById("payoff-instructions");
             instrContainer.innerHTML = "";
