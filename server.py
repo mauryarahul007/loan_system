@@ -424,7 +424,8 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
                                 "sentiment": sentiment,
                                 "severity": severity,
                                 "feature": feature,
-                                "notes": notes_str
+                                "notes": notes_str,
+                                "loan_type": phrase.title()
                             }
                             
                             if not any(x["text"].strip().lower() == normalized_txt for x in scraped_results):
@@ -458,8 +459,7 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
                         sentiment = "Complaint"
                 fallback_copy["sentiment"] = sentiment
                 comp_detected = extract_competitor(text_to_save)
-                if comp_detected:
-                    fallback_copy["notes"] = f"Competitor: {comp_detected}. {fallback_copy.get('notes', '')}"
+                fallback_copy["loan_type"] = phrase.title()
                 final_results.append(fallback_copy)
                 existing_texts.add(normalized_fallback_text)
                 if len(final_results) >= 10:
@@ -486,6 +486,7 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
             comp_detected = extract_competitor(unique_item["text"])
             if comp_detected:
                 unique_item["notes"] = f"Competitor: {comp_detected}. {unique_item.get('notes', '')}"
+            unique_item["loan_type"] = phrase.title()
             final_results.append(unique_item)
             
     print(f"Scrape completed for {loan_type}. Returning {len(final_results)} new unique issues.")
@@ -523,6 +524,7 @@ def update_excel_tracker(new_items):
             ws.cell(row=row_num, column=8).value = item["severity"]
             ws.cell(row=row_num, column=9).value = item["feature"]
             ws.cell(row=row_num, column=10).value = item["notes"]
+            ws.cell(row=row_num, column=11).value = item.get("loan_type", "Home Loan")
             
         wb.save(path)
         print("Excel file saved successfully!")

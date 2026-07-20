@@ -416,8 +416,11 @@ function initSocialLog() {
                 }
             }
             
+            const loanType = item.loan_type || "Home Loan";
+            
             tr.innerHTML = `
                 <td style="white-space: nowrap;">${item.date}</td>
+                <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${loanType}</span></td>
                 <td><div class="${platformClass}">${platformIcon}${item.platform}</div></td>
                 <td style="font-weight: 500;">${item.source}</td>
                 <td style="color: var(--text-primary); font-size: 13.5px; line-height: 1.4;">${item.text}</td>
@@ -567,8 +570,11 @@ function initSearchGaps() {
                 gapColor = "#fb923c"; // orange
             }
             
+            let loanType = item.loanType || "Home Loan";
+            
             tr.innerHTML = `
                 <td style="font-weight: 500; color: var(--text-primary); font-size: 13.5px;"><em>"${item.query}"</em></td>
+                <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${loanType}</span></td>
                 <td class="number" style="font-weight: 600;">${item.volume.toLocaleString("en-IN")}</td>
                 <td><span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">${item.type}</span></td>
                 <td class="number" style="white-space: nowrap;">${qualityStars} <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">(${item.quality}/5)</span></td>
