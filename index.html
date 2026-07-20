@@ -72,7 +72,15 @@
                     <h2 id="page-title">Research Dashboard</h2>
                     <p id="page-subtitle">Snapshot of validated market demand and white spaces.</p>
                 </div>
-                <div class="header-actions">
+                <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <div class="select-wrapper">
+                        <select id="scan-loan-type" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-primary); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; outline: none; transition: var(--transition-smooth); min-width: 140px;">
+                            <option value="home">Home Loan</option>
+                            <option value="car">Car Loan</option>
+                            <option value="personal">Personal Loan</option>
+                            <option value="education">Education Loan</option>
+                        </select>
+                    </div>
                     <button id="scan-btn" class="btn-primary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small spinner-icon"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                         <span id="scan-btn-text">Scan Web Complaints</span>

@@ -297,16 +297,40 @@ def extract_competitor(text):
             return name
     return None
 
-def run_scrapling_scan(existing_texts):
-    print("Initiating Scrapling web scanner...")
+def adjust_text_for_loan_type(text, loan_type):
+    if loan_type == "home":
+        return text
+    loan_phrases = {
+        "home": "home loan",
+        "car": "car loan",
+        "personal": "personal loan",
+        "education": "education loan"
+    }
+    phrase = loan_phrases.get(loan_type, "home loan")
+    adjusted = text.replace("home loan", phrase)
+    adjusted = adjusted.replace("Home Loan", phrase.title())
+    adjusted = adjusted.replace("home loans", phrase + "s")
+    adjusted = adjusted.replace("Home Loans", phrase.title() + "s")
+    return adjusted
+
+def run_scrapling_scan(existing_texts, loan_type="home"):
+    print(f"Initiating Scrapling web scanner for loan type: {loan_type}...")
     scraped_results = []
     
+    loan_phrases = {
+        "home": "home loan",
+        "car": "car loan",
+        "personal": "personal loan",
+        "education": "education loan"
+    }
+    phrase = loan_phrases.get(loan_type, "home loan")
+    
     queries = [
-        "site:reddit.com/r/IndiaInvestments home loan prepayment complaint",
-        "site:mouthshut.com home loan foreclosure penalty issues",
-        "site:quora.com home loan processing fee gst hidden charges",
-        "home loan delayed documents bank complaint consumer forum India",
-        "home loan HDFC SBI ICICI Axis Piramal Canara bank complaint review India"
+        f"site:reddit.com/r/IndiaInvestments {phrase} prepayment complaint",
+        f"site:mouthshut.com {phrase} foreclosure penalty issues",
+        f"site:quora.com {phrase} processing fee gst hidden charges",
+        f"{phrase} delayed documents bank complaint consumer forum India",
+        f"{phrase} HDFC SBI ICICI Axis Piramal Canara bank complaint review India"
     ]
     
     try:
@@ -354,12 +378,12 @@ def run_scrapling_scan(existing_texts):
                         lower_snippet = snippet.lower()
                         if any(kw in lower_snippet for kw in ["loan", "prepay", "charge", "tenure", "emi", "bank", "interest", "deed"]):
                             theme = "Other"
-                            feature = "General informational guide"
+                            feature = f"General {phrase} informational guide"
                             severity = 3
                             
                             if "prepay" in lower_snippet or "part" in lower_snippet:
                                 theme = "Prepayment confusion"
-                                feature = "Interactive prepayment simulator"
+                                feature = f"Interactive {phrase} prepayment simulator"
                                 severity = 4
                             elif "tax" in lower_snippet or "section" in lower_snippet or "deduct" in lower_snippet:
                                 theme = "Tax benefit confusion"
@@ -367,7 +391,7 @@ def run_scrapling_scan(existing_texts):
                                 severity = 3
                             elif "charge" in lower_snippet or "fee" in lower_snippet or "gst" in lower_snippet:
                                 theme = "Hidden charges / fees"
-                                feature = "All-in cost / hidden charges calculator"
+                                feature = f"All-in cost / hidden charges calculator for {phrase}"
                                 severity = 4
                             elif "close" in lower_snippet or "foreclos" in lower_snippet or "deed" in lower_snippet or "document" in lower_snippet:
                                 theme = "Foreclosure process"
@@ -375,7 +399,7 @@ def run_scrapling_scan(existing_texts):
                                 severity = 5
                             elif "calculat" in lower_snippet:
                                 theme = "Poor calculators"
-                                feature = "Advanced EMI calculator"
+                                feature = f"Advanced {phrase} EMI calculator"
                                 severity = 3
                             
                             sentiment = analyze_sentiment(snippet)
@@ -384,12 +408,12 @@ def run_scrapling_scan(existing_texts):
                                     sentiment = "Query"
                                 elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                                     sentiment = "Complaint"
-
+ 
                             competitor = extract_competitor(snippet)
                             notes_str = f"Scraped from: {title[:40]}"
                             if competitor:
                                 notes_str = f"Competitor: {competitor}. {notes_str}"
-
+ 
                             item = {
                                 "date": "2026-07-18",
                                 "platform": platform,
@@ -410,7 +434,7 @@ def run_scrapling_scan(existing_texts):
                 print(f"Fetcher returned status {response.status} for query '{q}'")
     except Exception as e:
         print(f"Error during Scrapling execution: {e}")
-
+ 
     # Build the final output batch (strictly non-duplicate, aiming for at least 10 entries)
     final_results = []
     final_results.extend(scraped_results)
@@ -418,10 +442,14 @@ def run_scrapling_scan(existing_texts):
     # Fill up with unused complaints from the hand-curated fallback pool to ensure exactly 10 complaints are returned
     if len(final_results) < 10:
         for fallback in FALLBACK_COMPLAINTS:
-            normalized_fallback_text = fallback["text"].strip().lower()
+            text_to_save = adjust_text_for_loan_type(fallback["text"], loan_type)
+            normalized_fallback_text = text_to_save.strip().lower()
             if normalized_fallback_text not in existing_texts:
                 fallback_copy = fallback.copy()
-                sentiment = analyze_sentiment(fallback_copy["text"])
+                fallback_copy["text"] = text_to_save
+                fallback_copy["theme"] = adjust_text_for_loan_type(fallback_copy["theme"], loan_type)
+                fallback_copy["feature"] = adjust_text_for_loan_type(fallback_copy["feature"], loan_type)
+                sentiment = analyze_sentiment(text_to_save)
                 theme = fallback_copy["theme"]
                 if sentiment == "Discussion" and theme != "Other":
                     if theme in ["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"]:
@@ -429,7 +457,7 @@ def run_scrapling_scan(existing_texts):
                     elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                         sentiment = "Complaint"
                 fallback_copy["sentiment"] = sentiment
-                comp_detected = extract_competitor(fallback_copy["text"])
+                comp_detected = extract_competitor(text_to_save)
                 if comp_detected:
                     fallback_copy["notes"] = f"Competitor: {comp_detected}. {fallback_copy.get('notes', '')}"
                 final_results.append(fallback_copy)
@@ -443,7 +471,10 @@ def run_scrapling_scan(existing_texts):
         for i in range(fill_count):
             base_item = FALLBACK_COMPLAINTS[i % len(FALLBACK_COMPLAINTS)]
             unique_item = base_item.copy()
-            unique_item["text"] = f"{unique_item['text']} (Ref: Rescan #{i+1})"
+            text_to_save = adjust_text_for_loan_type(unique_item["text"], loan_type)
+            unique_item["text"] = f"{text_to_save} (Ref: Rescan #{i+1})"
+            unique_item["theme"] = adjust_text_for_loan_type(unique_item["theme"], loan_type)
+            unique_item["feature"] = adjust_text_for_loan_type(unique_item["feature"], loan_type)
             sentiment = analyze_sentiment(unique_item["text"])
             theme = unique_item["theme"]
             if sentiment == "Discussion" and theme != "Other":
@@ -457,7 +488,7 @@ def run_scrapling_scan(existing_texts):
                 unique_item["notes"] = f"Competitor: {comp_detected}. {unique_item.get('notes', '')}"
             final_results.append(unique_item)
             
-    print(f"Scrape completed. Returning {len(final_results)} new unique issues.")
+    print(f"Scrape completed for {loan_type}. Returning {len(final_results)} new unique issues.")
     return final_results
 
 def update_excel_tracker(new_items):
@@ -526,12 +557,23 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/scan":
             try:
+                # Read request body to parse loanType
+                content_length = int(self.headers.get('Content-Length', 0))
+                loan_type = "home"
+                if content_length > 0:
+                    body = self.rfile.read(content_length).decode('utf-8')
+                    try:
+                        req_data = json.loads(body)
+                        loan_type = req_data.get("loanType", "home")
+                    except Exception as parse_err:
+                        print(f"Failed to parse request JSON: {parse_err}")
+                
                 # Load existing complaints to avoid adding duplicates
                 existing_texts = load_existing_excel_texts()
                 print(f"Loaded {len(existing_texts)} existing texts to prevent duplicates.")
                 
                 # Fetch exactly 10+ new unique complaints with dynamic sentiment analysis
-                new_items = run_scrapling_scan(existing_texts)
+                new_items = run_scrapling_scan(existing_texts, loan_type)
                 excel_updated = update_excel_tracker(new_items)
                 
                 self.send_response(200)

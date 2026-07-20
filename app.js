@@ -684,8 +684,13 @@ function initScanner() {
         scanText.textContent = "Scanning web for complaints...";
         
         try {
+            const loanType = document.getElementById("scan-loan-type")?.value || "home";
             const response = await fetch("/api/scan", {
-                method: "POST"
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ loanType: loanType })
             });
             const data = await response.json();
             
