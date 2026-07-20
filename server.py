@@ -549,12 +549,57 @@ def load_existing_excel_texts():
         print(f"Failed to load existing texts from Excel: {e}")
     return texts
 
+def load_existing_excel_complaints():
+    path = r"C:\Users\Rahul\Downloads\home_loan_research_tracker.xlsx"
+    complaints = []
+    if not os.path.exists(path):
+        return complaints
+    try:
+        wb = openpyxl.load_workbook(path, data_only=True)
+        ws = wb["Social Listening Log"]
+        for r in range(4, ws.max_row + 1):
+            date_val = ws.cell(row=r, column=1).value
+            text_val = ws.cell(row=r, column=4).value
+            if date_val and text_val:
+                complaints.append({
+                    "date": str(date_val),
+                    "platform": ws.cell(row=r, column=2).value or "",
+                    "source": ws.cell(row=r, column=3).value or "",
+                    "text": text_val,
+                    "theme": ws.cell(row=r, column=5).value or "",
+                    "pain": ws.cell(row=r, column=6).value or "",
+                    "sentiment": ws.cell(row=r, column=7).value or "",
+                    "severity": int(ws.cell(row=r, column=8).value or 3),
+                    "feature": ws.cell(row=r, column=9).value or "",
+                    "notes": ws.cell(row=r, column=10).value or "",
+                    "loan_type": ws.cell(row=r, column=11).value or "Home Loan"
+                })
+    except Exception as e:
+        print(f"Failed to load complaints from Excel: {e}")
+    return complaints
+
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        # Force fresh content delivery by stripping conditional headers
-        del self.headers['If-Modified-Since']
-        del self.headers['If-None-Match']
-        super().do_GET()
+        if self.path == "/api/logs":
+            try:
+                complaints = load_existing_excel_complaints()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "logs": complaints}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+        else:
+            # Force fresh content delivery by stripping conditional headers
+            if 'If-Modified-Since' in self.headers:
+                del self.headers['If-Modified-Since']
+            if 'If-None-Match' in self.headers:
+                del self.headers['If-None-Match']
+            super().do_GET()
         
     def do_POST(self):
         if self.path == "/api/scan":
