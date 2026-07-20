@@ -124,7 +124,41 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set current date
     const dateOpts = { year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById("current-date").textContent = new Date().toLocaleDateString('en-US', dateOpts);
+    
+    // Hydrate tables with MongoDB Atlas items
+    loadLogsFromDatabase();
 });
+
+async function loadLogsFromDatabase() {
+    try {
+        const response = await fetch("/api/logs");
+        const data = await response.json();
+        if (data.success && data.logs && data.logs.length > 0) {
+            data.logs.forEach(item => {
+                const cleanText = item.text.trim().toLowerCase();
+                if (!socialLog.some(existing => existing.text.trim().toLowerCase() === cleanText)) {
+                    socialLog.unshift(item);
+                }
+            });
+            // Re-classify all and refresh views
+            socialLog.forEach(item => {
+                let sentiment = classifySentiment(item.text);
+                if (sentiment === "Discussion" && item.theme !== "Other") {
+                    if (["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"].includes(item.theme)) {
+                        sentiment = "Query";
+                    } else if (["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"].includes(item.theme)) {
+                        sentiment = "Complaint";
+                    }
+                }
+                item.sentiment = sentiment;
+            });
+            initDashboard();
+            initSocialLog();
+        }
+    } catch (err) {
+        console.error("Failed to load logs from database:", err);
+    }
+}
 
 // 1. Tab switching router
 function initTabSwitching() {
