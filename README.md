@@ -31,6 +31,7 @@
 
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
+- [Documentation](#documentation)
 - [Features](#features)
 - [Project Structure](#project-structure)
     - [Project Index](#project-index)
@@ -49,6 +50,17 @@
 ## Overview
 
 **Loans Project** is an interactive Home Loan Research & Social Listening Dashboard. It allows users to scrape search engines and forums (Reddit, MouthShut, Quora) for home loan customer queries, complaints, and appreciation statements using the stealthy `Scrapling` web crawler, analyze customer tone into 5 categories, and map them to a prioritised opportunity pipeline and gap matrix.
+
+---
+
+## Documentation
+
+The project includes structured documentation based on the **Diataxis Framework**:
+
+- 🎓 **[Tutorial: Simulating Home Loan Prepayment & Amortisation](docs/tutorial-home-loan-prepayment.md)** — Step-by-step guide to modeling lump-sum part-payments and tenure vs EMI reduction.
+- 🛠️ **[How to Calculate All-In Home Loan Processing Costs & Stamp Duty](docs/howto-calculate-all-in-loan-costs.md)** — Practical guide for estimating bank processing fees, GST, stamp duty, and MOD fees across Indian states.
+- 📖 **[Financial Calculation API & Schema Reference](docs/reference-finance-api.md)** — Comprehensive technical reference for `lib/finance/` TypeScript modules (`emi`, `prepayment`, `costs`, `balanceTransfer`, `tax`).
+- 💡 **[Architectural Explanation: Privacy-First Client-Side Financial Modeling](docs/explanation-privacy-first-architecture.md)** — Architectural rationale behind the zero-lead-sale client-side computation engine.
 
 ---
 
