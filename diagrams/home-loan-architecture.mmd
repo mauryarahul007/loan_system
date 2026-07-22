@@ -1,0 +1,24 @@
+graph TD
+    subgraph UI ["User Interface & MDX Layer"]
+        A["MDX Knowledge Articles"] --> B["Embedded Interactive Calculators"]
+    end
+
+    subgraph Calculators ["Client-Side Calculators"]
+        B --> C["EMI & Amortisation Widget"]
+        B --> D["Dual Prepayment Simulator"]
+        B --> E["All-In Cost & Stamp Duty Calculator"]
+        B --> F["Balance Transfer Savings Estimator"]
+        B --> G["Tax Regime Deduction Estimator"]
+    end
+
+    subgraph Engine ["Pure Finance Engine (lib/finance/*)"]
+        C --> H["lib/finance/emi.ts"]
+        D --> I["lib/finance/prepayment.ts"]
+        E --> J["lib/finance/costs.ts"]
+        F --> K["lib/finance/balanceTransfer.ts"]
+        G --> L["lib/finance/tax.ts"]
+    end
+
+    subgraph Config ["Statutory Rules"]
+        J & L --> M["config/taxRules.ts"]
+    end
