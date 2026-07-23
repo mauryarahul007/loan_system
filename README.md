@@ -138,7 +138,7 @@ loan_system/
 
 2. **Install Python dependencies:**
    ```bash
-   pip install openpyxl scrapling curl-cffi browserforge
+   pip install -r requirements.txt
    ```
 
 3. **Start the local server:**
@@ -150,31 +150,38 @@ loan_system/
 
 ---
 
-## 🧪 Verification & Testing
+## 📑 Audit & Quality Assurance Reports
 
-Run the automated self-check test suite:
+Comprehensive audit reports generated via **gstack** automated skills are preserved in the [`reports/`](reports/) folder:
 
-```bash
-python test_scanner.py
-```
-
-*Time-to-Hello-World (TTHW): **< 2 minutes**.*
+- 📊 [**CHANGELOG.md**](CHANGELOG.md) — Daily Release History & Change Tracking
+- 🧪 [**qa_report.md**](reports/qa_report.md) — Health Score 98/100 QA Audit Report (51/51 Test Cases)
+- 🛡️ [**cso_security_audit_20260723.json**](reports/cso_security_audit_20260723.json) — CSO Infrastructure & Security Scan (0 Vulnerabilities)
+- 🎯 [**design_shotgun_board.md**](reports/design_shotgun_board.md) — 6-Variant AI Design Shotgun Board
+- 👑 [**color_theme_mockup.md**](reports/color_theme_mockup.md) — Executive Obsidian & Champagne Gold Theme Spec
+- 📐 [**implementation_plan.md**](reports/implementation_plan.md) — 3-Tier Scraper Architecture Plan
+- 🚀 [**walkthrough.md**](reports/walkthrough.md) — Agent-Reach Integration Walkthrough
 
 ---
 
-## 🛠️ Built with gstack Skill Suite
+## 🛠️ Operational Commands
 
-This project utilizes the `gstack` agent skill suite for automated quality assurance and review:
+```bash
+# Run automated test suite (TTHW < 2 min)
+python test_scanner.py
+
+# Run local web server
+python server.py
+```
+
+---
+
+## 📜 License
+
+This project is open-source and available under the [MIT License](LICENSE).
+ project utilizes the `gstack` agent skill suite for automated quality assurance and review:
 
 - `/autoplan` — Full CEO, Design, Eng, and DX review pipeline.
 - `/devex-review` — Developer experience audit (Score: 8.4/10).
 - `/plan-eng-review` — Architecture, test coverage, and code quality review.
-- `/document-generate` — Diataxis documentation suite generation.
-- `/document-release` — Post-ship documentation health & coverage audit.
-- `/diagram` — Offline Mermaid to Excalidraw / SVG / PNG rendering.
-
----
-
-## 📄 License
-
 This project is licensed under the [MIT License](LICENSE).
