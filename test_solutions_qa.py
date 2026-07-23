@@ -42,6 +42,7 @@ test_cases = [
     { "id": "TC-21", "format": "Advanced calculator", "expected_ids": ["calc-principal", "res-calc-emi"] },
     { "id": "TC-22", "format": "Compounding annual prepayment simulator", "expected_ids": ["multi-principal", "res-multi-years"] },
     { "id": "TC-23", "format": "Single A-to-Z hub", "expected_ids": ["Phase 1: Pre-Approval & Sanction", "Phase 6: Final Deed Return"] },
+    { "id": "TC-24", "format": "Prepayment choice manager / Tenure vs EMI simulator", "expected_ids": ["payoff-principal", "res-payoff-years"] },
 ]
 
 def simulate_format_matching(format_str):
@@ -59,7 +60,7 @@ def simulate_format_matching(format_str):
         return "PREPAYMENT_DRAFT_ENGINE"
     elif "multi-prepayment" in format_lower or "part payment" in format_lower or "compounding annual" in format_lower:
         return "MULTI_PREPAYMENT_ENGINE"
-    elif "payoff-strategy" in format_lower or "reduce home loan tenure" in format_lower or "payoff" in format_lower or "prepayment calculator" in format_lower:
+    elif "payoff-strategy" in format_lower or "reduce home loan tenure" in format_lower or "payoff" in format_lower or "prepayment" in format_lower or "prepay" in format_lower or "choice manager" in format_lower or "tenure vs emi" in format_lower:
         return "PAYOFF_STRATEGY_ENGINE"
     elif "bt" in format_lower or "balance transfer" in format_lower or "switching cost" in format_lower:
         return "BT_ENGINE"

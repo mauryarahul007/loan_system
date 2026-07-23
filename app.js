@@ -2777,7 +2777,7 @@ Date: ${todayStr}`;
 
         recalculateMultiPrepay();
 
-    } else if (formatLower.includes("payoff-strategy") || formatLower.includes("reduce home loan tenure") || formatLower.includes("prepayment calculator") || formatLower.includes("interactive prepayment")) {
+    } else if (formatLower.includes("payoff-strategy") || formatLower.includes("reduce home loan tenure") || formatLower.includes("prepayment") || formatLower.includes("prepay") || formatLower.includes("choice manager") || formatLower.includes("tenure vs emi") || formatLower.includes("emi-vs-tenure")) {
         // Engine 3: Loan Payoff Strategy & Tenure Acceleration Engine
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
