@@ -152,8 +152,10 @@ async function loadLogsFromDatabase() {
                 }
                 item.sentiment = sentiment;
             });
+            syncSearchKeywordsFromLogs(socialLog);
             initDashboard();
             initSocialLog();
+            initSearchGaps();
         }
     } catch (err) {
         console.error("Failed to load logs from database:", err);
@@ -1794,6 +1796,27 @@ window.selectPayoffStep = function(stepIdx) {
     updateAllocationChartForStep(stepIdx);
 };
 
+// Dynamic Search Intent Keyword Mapper from Scraped Complaints
+function syncSearchKeywordsFromLogs(items) {
+    if (!items || !items.length) return;
+    items.forEach(item => {
+        const label = item.loan_type || item.loanType || "Home Loan";
+        const themeClean = (item.theme || "general").toLowerCase();
+        const queryText = `${label.toLowerCase()} ${themeClean} issues and rules`;
+        
+        if (!searchIntentGaps.some(g => g.query.toLowerCase() === queryText.toLowerCase())) {
+            searchIntentGaps.unshift({
+                query: queryText,
+                volume: Math.floor(3000 + Math.random() * 8000),
+                type: item.sentiment === "Query" ? "Informational" : "Comparison",
+                quality: Math.floor(2 + Math.random() * 2),
+                format: item.feature || `${label} guidance tool`,
+                loan_type: label
+            });
+        }
+    });
+}
+
 // 7. Web Scraper runner logic & fallback integration
 let globalScanCounter = 0;
 
@@ -1824,16 +1847,19 @@ function initScanner() {
 
             if (data.success && data.results && data.results.length > 0) {
                 let addedCount = 0;
+                const newItems = [];
                 data.results.forEach(item => {
                     const uniqueItem = {
                         ...item,
                         text: `${item.text} (Ref: Scan #${globalScanCounter})`
                     };
                     socialLog.unshift(uniqueItem);
+                    newItems.push(uniqueItem);
                     addedCount++;
                 });
 
-                // Re-classify sentiment
+                // Sync keywords & re-classify sentiment
+                syncSearchKeywordsFromLogs(newItems);
                 socialLog.forEach(item => {
                     let sentiment = classifySentiment(item.text);
                     if (sentiment === "Discussion" && item.theme !== "Other") {
@@ -1849,6 +1875,7 @@ function initScanner() {
                 // Update UI views
                 initDashboard();
                 initSocialLog();
+                initSearchGaps();
 
                 if (scanBtnText) scanBtnText.textContent = `Scan Complete (+${addedCount} Added!)`;
             } else {
@@ -1892,8 +1919,10 @@ function generateFallbackScanResults(loanType) {
         addedCount++;
     });
 
+    syncSearchKeywordsFromLogs(fallbackPool);
     initDashboard();
     initSocialLog();
+    initSearchGaps();
 
     const scanBtnText = document.getElementById("scan-btn-text");
     if (scanBtnText) scanBtnText.textContent = `Scan Complete (+${addedCount} Added!)`;
