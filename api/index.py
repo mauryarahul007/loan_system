@@ -406,16 +406,6 @@ def get_logs():
     try:
         logs = []
         if collection is not None:
-            if collection.count_documents({}) == 0:
-                # Seed database with baseline complaints on first run
-                seed_data = []
-                for fallback in FALLBACK_COMPLAINTS:
-                    copy_item = fallback.copy()
-                    if "loan_type" not in copy_item:
-                        copy_item["loan_type"] = "Home Loan"
-                    seed_data.append(copy_item)
-                collection.insert_many(seed_data)
-                
             logs = list(collection.find({}, {"_id": 0}))
         return jsonify({"success": True, "logs": logs})
     except Exception as e:
