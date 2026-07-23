@@ -617,7 +617,50 @@ def load_existing_excel_complaints():
         print(f"Failed to load complaints from Excel: {e}")
     return complaints
 
+def delete_complaints_from_excel(texts=None, delete_all=False):
+    excel_path = "home_loan_complaints_scraped.xlsx"
+    if not os.path.exists(excel_path):
+        return 0
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(excel_path)
+        ws = wb.active
+        
+        if delete_all:
+            # Delete all rows except header
+            if ws.max_row > 1:
+                ws.delete_rows(2, ws.max_row - 1)
+            wb.save(excel_path)
+            return True
+            
+        if not texts:
+            return 0
+            
+        normalized_targets = set(t.strip().lower() for t in texts)
+        rows_to_delete = []
+        for r in range(2, ws.max_row + 1):
+            cell_val = ws.cell(row=r, column=4).value
+            if cell_val and cell_val.strip().lower() in normalized_targets:
+                rows_to_delete.append(r)
+                
+        # Delete rows from bottom to top to preserve row indexing
+        for r in sorted(rows_to_delete, reverse=True):
+            ws.delete_rows(r, 1)
+            
+        wb.save(excel_path)
+        return len(rows_to_delete)
+    except Exception as e:
+        print(f"Failed to delete complaints from Excel: {e}")
+        return 0
+
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
     def do_GET(self):
         if self.path == "/api/logs":
             try:
@@ -641,7 +684,30 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
             super().do_GET()
         
     def do_POST(self):
-        if self.path == "/api/scan":
+        if self.path == "/api/delete-logs":
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                req_data = {}
+                if content_length > 0:
+                    body = self.rfile.read(content_length).decode('utf-8')
+                    req_data = json.loads(body)
+                
+                texts = req_data.get("texts", [])
+                delete_all = req_data.get("all", False)
+                
+                deleted_count = delete_complaints_from_excel(texts, delete_all)
+                
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "deletedCount": deleted_count}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode("utf-8"))
+        elif self.path == "/api/scan":
             try:
                 # Read request body to parse loanType
                 content_length = int(self.headers.get('Content-Length', 0))

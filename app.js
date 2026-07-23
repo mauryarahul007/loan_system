@@ -456,15 +456,33 @@ function animateCharts() {
     });
 }
 
+// Helper to delete logs from backend database & local excel
+async function apiDeleteLogs(texts = [], deleteAll = false) {
+    try {
+        await fetch("/api/delete-logs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ texts: texts, all: deleteAll })
+        });
+    } catch (err) {
+        console.error("Failed to sync deletion with database:", err);
+    }
+}
+
 // 3. Social listening log render & search filter
 function initSocialLog() {
     const tableBody = document.getElementById("social-table-body");
     const searchInput = document.getElementById("social-search");
     const themeSelect = document.getElementById("social-filter-theme");
     const sentimentSelect = document.getElementById("social-filter-sentiment");
+    const selectAllCb = document.getElementById("select-all-social");
+    const deleteSelectedBtn = document.getElementById("btn-delete-social-selected");
+    const countSelectedSpan = document.getElementById("count-social-selected");
+    const cleanDbBtn = document.getElementById("btn-clean-social-db");
     
     // Populate theme dropdown options
     const uniqueThemes = [...new Set(socialLog.map(item => item.theme))].sort();
+    themeSelect.innerHTML = `<option value="">All Themes</option>`;
     uniqueThemes.forEach(theme => {
         const opt = document.createElement("option");
         opt.value = theme;
@@ -472,11 +490,71 @@ function initSocialLog() {
         themeSelect.appendChild(opt);
     });
     
+    function updateSelectionState() {
+        const checkedBoxes = tableBody.querySelectorAll(".row-select-social:checked");
+        const count = checkedBoxes.length;
+        if (countSelectedSpan) countSelectedSpan.textContent = count;
+        if (deleteSelectedBtn) deleteSelectedBtn.style.display = count > 0 ? "inline-flex" : "none";
+        
+        const allBoxes = tableBody.querySelectorAll(".row-select-social");
+        if (selectAllCb) {
+            selectAllCb.checked = allBoxes.length > 0 && checkedBoxes.length === allBoxes.length;
+        }
+    }
+
+    if (selectAllCb) {
+        selectAllCb.addEventListener("change", () => {
+            const isChecked = selectAllCb.checked;
+            const checkboxes = tableBody.querySelectorAll(".row-select-social");
+            checkboxes.forEach(cb => cb.checked = isChecked);
+            updateSelectionState();
+        });
+    }
+
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener("click", async () => {
+            const checkedBoxes = tableBody.querySelectorAll(".row-select-social:checked");
+            const selectedIndices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute("data-index")));
+            if (selectedIndices.length === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedIndices.length} selected statement(s)?`)) return;
+            
+            const deletedTexts = [];
+            selectedIndices.sort((a, b) => b - a).forEach(idx => {
+                if (idx >= 0 && idx < socialLog.length) {
+                    deletedTexts.push(socialLog[idx].text);
+                    socialLog.splice(idx, 1);
+                }
+            });
+
+            await apiDeleteLogs(deletedTexts, false);
+            syncSearchKeywordsFromLogs(socialLog);
+            initDashboard();
+            renderSocialLogs();
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
+        });
+    }
+
+    if (cleanDbBtn) {
+        cleanDbBtn.addEventListener("click", async () => {
+            if (!confirm("⚠️ Danger Zone: Are you sure you want to purge ALL consumer complaint logs from the database? This action cannot be undone.")) return;
+            
+            await apiDeleteLogs([], true);
+            socialLog.length = 0;
+            syncSearchKeywordsFromLogs(socialLog);
+            initDashboard();
+            renderSocialLogs();
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
+        });
+    }
+
     // Render logs
     function renderSocialLogs() {
-        const searchVal = searchInput.value.toLowerCase();
-        const themeVal = themeSelect.value;
-        const sentimentVal = sentimentSelect.value;
+        const searchVal = searchInput ? searchInput.value.toLowerCase() : "";
+        const themeVal = themeSelect ? themeSelect.value : "";
+        const sentimentVal = sentimentSelect ? sentimentSelect.value : "";
         
         tableBody.innerHTML = "";
         
@@ -491,11 +569,14 @@ function initSocialLog() {
         });
         
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="8" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No consumer statements found matching the filters.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="11" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No consumer statements found matching the filters.</td></tr>`;
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
             return;
         }
         
         filtered.forEach(item => {
+            const realIdx = socialLog.indexOf(item);
             const tr = document.createElement("tr");
             
             // Format Platform tag
@@ -529,6 +610,7 @@ function initSocialLog() {
             const loanType = item.loan_type || "Home Loan";
             
             tr.innerHTML = `
+                <td style="text-align: center;"><input type="checkbox" class="row-select-social" data-index="${realIdx}"></td>
                 <td style="white-space: nowrap;">${item.date}</td>
                 <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${loanType}</span></td>
                 <td><div class="${platformClass}">${platformIcon}${item.platform}</div></td>
@@ -541,15 +623,38 @@ function initSocialLog() {
                     <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">${item.feature}</div>
                     <div style="color: var(--text-muted); font-style: italic;">${item.notes}</div>
                 </td>
+                <td style="text-align: center;">
+                    <button class="btn-delete-row btn-delete-social" data-index="${realIdx}" title="Delete line item">🗑️</button>
+                </td>
             `;
             tableBody.appendChild(tr);
         });
+
+        tableBody.querySelectorAll(".row-select-social").forEach(cb => {
+            cb.addEventListener("change", updateSelectionState);
+        });
+
+        tableBody.querySelectorAll(".btn-delete-social").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const idx = parseInt(btn.getAttribute("data-index"));
+                if (idx >= 0 && idx < socialLog.length) {
+                    const deletedItem = socialLog.splice(idx, 1)[0];
+                    await apiDeleteLogs([deletedItem.text], false);
+                    syncSearchKeywordsFromLogs(socialLog);
+                    initDashboard();
+                    renderSocialLogs();
+                    updateSelectionState();
+                }
+            });
+        });
+
+        updateSelectionState();
     }
     
     // Attach event listeners
-    searchInput.addEventListener("input", renderSocialLogs);
-    themeSelect.addEventListener("change", renderSocialLogs);
-    sentimentSelect.addEventListener("change", renderSocialLogs);
+    if (searchInput) searchInput.addEventListener("input", renderSocialLogs);
+    if (themeSelect) themeSelect.addEventListener("change", renderSocialLogs);
+    if (sentimentSelect) sentimentSelect.addEventListener("change", renderSocialLogs);
     
     // Init render
     renderSocialLogs();
@@ -630,9 +735,54 @@ function initSearchGaps() {
     const searchInput = document.getElementById("search-gap-search");
     const loanTypeSelect = document.getElementById("search-filter-loantype");
     const headers = document.querySelectorAll("#search-gap-table th.sortable");
+    const selectAllCb = document.getElementById("select-all-search");
+    const deleteSelectedBtn = document.getElementById("btn-delete-search-selected");
+    const countSelectedSpan = document.getElementById("count-search-selected");
     
     let currentSortCol = "gapScore";
     let currentSortAsc = false; // Descending by default for gapScore
+    
+    function updateSelectionState() {
+        const checkedBoxes = tableBody.querySelectorAll(".row-select-search:checked");
+        const count = checkedBoxes.length;
+        if (countSelectedSpan) countSelectedSpan.textContent = count;
+        if (deleteSelectedBtn) deleteSelectedBtn.style.display = count > 0 ? "inline-flex" : "none";
+        
+        const allBoxes = tableBody.querySelectorAll(".row-select-search");
+        if (selectAllCb) {
+            selectAllCb.checked = allBoxes.length > 0 && checkedBoxes.length === allBoxes.length;
+        }
+    }
+
+    if (selectAllCb) {
+        selectAllCb.addEventListener("change", () => {
+            const isChecked = selectAllCb.checked;
+            const checkboxes = tableBody.querySelectorAll(".row-select-search");
+            checkboxes.forEach(cb => cb.checked = isChecked);
+            updateSelectionState();
+        });
+    }
+
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener("click", () => {
+            const checkedBoxes = tableBody.querySelectorAll(".row-select-search:checked");
+            const selectedIndices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute("data-index")));
+            if (selectedIndices.length === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedIndices.length} selected search gap(s)?`)) return;
+            
+            selectedIndices.sort((a, b) => b - a).forEach(idx => {
+                if (idx >= 0 && idx < searchIntentGaps.length) {
+                    searchIntentGaps.splice(idx, 1);
+                }
+            });
+
+            initDashboard();
+            renderSearchGaps();
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
+        });
+    }
     
     function renderSearchGaps() {
         const searchVal = searchInput ? searchInput.value.toLowerCase() : "";
@@ -688,11 +838,14 @@ function initSearchGaps() {
         });
         
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No search gaps found matching the current query & filter.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="9" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No search gaps found matching the current query & filter.</td></tr>`;
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
             return;
         }
         
         filtered.forEach(item => {
+            const realIdx = searchIntentGaps.indexOf(item);
             const tr = document.createElement("tr");
             
             // Format Quality score stars
@@ -716,6 +869,7 @@ function initSearchGaps() {
             }
             
             tr.innerHTML = `
+                <td style="text-align: center;"><input type="checkbox" class="row-select-search" data-index="${realIdx}"></td>
                 <td style="font-weight: 500; color: var(--text-primary); font-size: 13.5px;"><em>"${item.query}"</em></td>
                 <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${item.loan_type}</span></td>
                 <td class="number" style="font-weight: 600;">${item.volume.toLocaleString("en-IN")}</td>
@@ -723,9 +877,30 @@ function initSearchGaps() {
                 <td class="number" style="white-space: nowrap;">${qualityStars} <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">(${item.quality}/5)</span></td>
                 <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px; cursor: help;" title="Gap Score = (Search Volume) * (6 - Competitor Answer Quality). A higher score indicates a large, poorly-answered search demand.">${item.gapScore.toLocaleString("en-IN")}</td>
                 <td style="font-weight: 500; color: var(--accent-purple);">${item.format}</td>
+                <td style="text-align: center;">
+                    <button class="btn-delete-row btn-delete-search" data-index="${realIdx}" title="Delete line item">🗑️</button>
+                </td>
             `;
             tableBody.appendChild(tr);
         });
+
+        tableBody.querySelectorAll(".row-select-search").forEach(cb => {
+            cb.addEventListener("change", updateSelectionState);
+        });
+
+        tableBody.querySelectorAll(".btn-delete-search").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.getAttribute("data-index"));
+                if (idx >= 0 && idx < searchIntentGaps.length) {
+                    searchIntentGaps.splice(idx, 1);
+                    initDashboard();
+                    renderSearchGaps();
+                    updateSelectionState();
+                }
+            });
+        });
+
+        updateSelectionState();
     }
     
     // Attach event listeners
@@ -755,6 +930,51 @@ let currentSortOrder = "desc";
 function initOpportunities() {
     const tableBody = document.getElementById("opps-table-body");
     const headers = document.querySelectorAll("#opps-table th.sortable");
+    const selectAllCb = document.getElementById("select-all-opps");
+    const deleteSelectedBtn = document.getElementById("btn-delete-opps-selected");
+    const countSelectedSpan = document.getElementById("count-opps-selected");
+
+    function updateSelectionState() {
+        const checkedBoxes = tableBody.querySelectorAll(".row-select-opps:checked");
+        const count = checkedBoxes.length;
+        if (countSelectedSpan) countSelectedSpan.textContent = count;
+        if (deleteSelectedBtn) deleteSelectedBtn.style.display = count > 0 ? "inline-flex" : "none";
+        
+        const allBoxes = tableBody.querySelectorAll(".row-select-opps");
+        if (selectAllCb) {
+            selectAllCb.checked = allBoxes.length > 0 && checkedBoxes.length === allBoxes.length;
+        }
+    }
+
+    if (selectAllCb) {
+        selectAllCb.addEventListener("change", () => {
+            const isChecked = selectAllCb.checked;
+            const checkboxes = tableBody.querySelectorAll(".row-select-opps");
+            checkboxes.forEach(cb => cb.checked = isChecked);
+            updateSelectionState();
+        });
+    }
+
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener("click", () => {
+            const checkedBoxes = tableBody.querySelectorAll(".row-select-opps:checked");
+            const selectedIndices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute("data-index")));
+            if (selectedIndices.length === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedIndices.length} selected opportunity feature(s)?`)) return;
+            
+            selectedIndices.sort((a, b) => b - a).forEach(idx => {
+                if (idx >= 0 && idx < opportunityScoring.length) {
+                    opportunityScoring.splice(idx, 1);
+                }
+            });
+
+            initDashboard();
+            renderOpportunities();
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
+        });
+    }
     
     function renderOpportunities() {
         tableBody.innerHTML = "";
@@ -785,14 +1005,23 @@ function initOpportunities() {
             if (valA > valB) return currentSortOrder === "asc" ? 1 : -1;
             return 0;
         });
+
+        if (processedOpps.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="10" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No feature opportunities found.</td></tr>`;
+            if (selectAllCb) selectAllCb.checked = false;
+            updateSelectionState();
+            return;
+        }
         
         processedOpps.forEach(opp => {
+            const realIdx = opportunityScoring.indexOf(opp);
             const tr = document.createElement("tr");
             
             // Format priority badge
             const priorityClass = `badge ${opp.priority.toLowerCase()}`;
             
             tr.innerHTML = `
+                <td style="text-align: center;"><input type="checkbox" class="row-select-opps" data-index="${realIdx}"></td>
                 <td style="font-weight: 600; color: var(--text-primary); font-size: 13.5px;">${opp.name}</td>
                 <td class="number">${opp.reach}</td>
                 <td class="number">${opp.impact}</td>
@@ -801,9 +1030,30 @@ function initOpportunities() {
                 <td class="number" style="font-weight: 700; color: var(--accent-purple); font-size: 15px; cursor: help;" title="RICE Score = (Reach * Impact * Confidence) / Effort. Reach: target audience size. Impact: value to customer. Confidence: our certainty of impact. Effort: months to build.">${opp.rice.toFixed(1)}</td>
                 <td style="text-align: center;"><span class="${priorityClass}">${opp.priority}</span></td>
                 <td style="font-size: 12.5px; font-weight: 500; color: var(--text-secondary);">${opp.evidence}</td>
+                <td style="text-align: center;">
+                    <button class="btn-delete-row btn-delete-opps" data-index="${realIdx}" title="Delete line item">🗑️</button>
+                </td>
             `;
             tableBody.appendChild(tr);
         });
+
+        tableBody.querySelectorAll(".row-select-opps").forEach(cb => {
+            cb.addEventListener("change", updateSelectionState);
+        });
+
+        tableBody.querySelectorAll(".btn-delete-opps").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.getAttribute("data-index"));
+                if (idx >= 0 && idx < opportunityScoring.length) {
+                    opportunityScoring.splice(idx, 1);
+                    initDashboard();
+                    renderOpportunities();
+                    updateSelectionState();
+                }
+            });
+        });
+
+        updateSelectionState();
     }
     
     // Sort clicks setup

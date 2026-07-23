@@ -278,8 +278,8 @@
 
                 <!-- Tab: Social Listening -->
                 <section id="tab-social" class="tab-pane">
-                    <div class="filter-bar">
-                        <div class="search-input-wrapper">
+                    <div class="filter-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <div class="search-input-wrapper" style="flex: 1; min-width: 240px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <input type="text" id="social-search" placeholder="Search consumer statements (e.g. prepayment, tax, HDFC)...">
                         </div>
@@ -299,12 +299,22 @@
                                 <option value="Appreciation">Appreciation</option>
                             </select>
                         </div>
+                        <div class="bulk-action-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btn-delete-social-selected" class="btn-danger-small" style="display: none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Delete Selected (<span id="count-social-selected">0</span>)
+                            </button>
+                            <button id="btn-clean-social-db" class="btn-secondary-danger-small" title="Clean DB & Purge All Logs">
+                                🧹 Clean DB / Purge All
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="table-container">
                         <table id="social-table">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-social" title="Select / Deselect All"></th>
                                     <th>Date</th>
                                     <th>Loan Type</th>
                                     <th>Platform</th>
@@ -314,6 +324,7 @@
                                     <th>Sentiment</th>
                                     <th>Severity</th>
                                     <th>Implied Feature / Notes</th>
+                                    <th style="width: 70px; text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="social-table-body">
@@ -351,8 +362,8 @@
 
                 <!-- Tab: Search Gaps -->
                 <section id="tab-search" class="tab-pane">
-                    <div class="filter-bar">
-                        <div class="search-input-wrapper">
+                    <div class="filter-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <div class="search-input-wrapper" style="flex: 1; min-width: 240px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <input type="text" id="search-gap-search" placeholder="Search keywords...">
                         </div>
@@ -365,12 +376,19 @@
                                 <option value="Education Loan">Education Loan</option>
                             </select>
                         </div>
+                        <div class="bulk-action-wrapper">
+                            <button id="btn-delete-search-selected" class="btn-danger-small" style="display: none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Delete Selected (<span id="count-search-selected">0</span>)
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="table-container">
                         <table id="search-gap-table">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-search" title="Select / Deselect All"></th>
                                     <th class="sortable" data-sort="query">Search Query / Keyword <span class="sort-icon">↕</span></th>
                                     <th class="sortable" data-sort="loan_type">Loan Type <span class="sort-icon">↕</span></th>
                                     <th class="sortable number" data-sort="volume">Monthly Search Volume <span class="sort-icon">↕</span></th>
@@ -378,6 +396,7 @@
                                     <th class="sortable number" data-sort="quality">Competitor Answer Quality (1-5) <span class="sort-icon">↕</span></th>
                                     <th class="sortable number" data-sort="gapScore" style="cursor: pointer;" title="Gap Score = (Monthly Search Volume) &times; (6 - Competitor Answer Quality). Higher scores indicate high-volume searches with weak or missing competitor answers.">Gap Score ⓘ <span class="sort-icon">↕</span></th>
                                     <th class="sortable" data-sort="format">Proposed Solution Format <span class="sort-icon">↕</span></th>
+                                    <th style="width: 70px; text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="search-table-body">
@@ -389,14 +408,21 @@
 
                 <!-- Tab: Opportunities -->
                 <section id="tab-opportunities" class="tab-pane">
-                    <div class="opportunity-controls">
+                    <div class="opportunity-controls" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                         <span>Click headers to sort RICE list.</span>
+                        <div class="bulk-action-wrapper">
+                            <button id="btn-delete-opps-selected" class="btn-danger-small" style="display: none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-small"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Delete Selected (<span id="count-opps-selected">0</span>)
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="table-container">
                         <table id="opps-table">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-opps" title="Select / Deselect All"></th>
                                     <th class="sortable active" data-sort="name">Opportunity / Feature to Build</th>
                                     <th class="sortable number" data-sort="reach">Reach (1-5)</th>
                                     <th class="sortable number" data-sort="impact">Impact (1-5)</th>
@@ -405,6 +431,7 @@
                                     <th class="sortable number" data-sort="rice" style="cursor: help;" title="RICE Score = (Reach &times; Impact &times; Confidence) / Effort. Used to rank feature opportunities by impact-to-effort ratio.">RICE Score ⓘ</th>
                                     <th>Priority</th>
                                     <th>Evidence / Linked Theme</th>
+                                    <th style="width: 70px; text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="opps-table-body">

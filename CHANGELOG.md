@@ -24,6 +24,13 @@ All notable changes to the Home Loan Knowledge Hub project are documented in thi
 - **Continuous Multi-Click Scanner (`app.js`)**: Fixed `#scan-btn` click handler. Every scan run assigns unique reference tags (`Ref: Live Scan #N-XXXX`) and incremental scan numbers (`Scan #1`, `Scan #2`, etc.) to append new records on repeat clicks without deduplication locks.
 - **Dynamic Keyword Mapper Sync (`app.js`)**: Connected `#stat-keywords-count` ("High volume search intent gaps") to live scraped complaint logs, automatically extracting search queries and populating the Search Intent Gaps table.
 
+### 🧹 Table Data Management & DB Cleaning
+- **Individual Line Item Delete**: Added `🗑️` delete action buttons to every row in **Social Listening**, **Search Intent Gaps**, and **RICE Prioritization** tables.
+- **Select All & Batch Delete**: Added header checkboxes (`Select All`) and dynamic `Delete Selected (N)` action buttons for batch row deletion.
+- **Database Cleaning Endpoint (`/api/delete-logs`)**: Added `POST /api/delete-logs` backend endpoint in `server.py` and `api/index.py` for single/batch deletion and full database purge (`Clean DB / Purge All`).
+- **Dynamic Stats & Chart Recalculation**: Deleting items automatically updates total comments (`#stat-comments-count`), keywords count (`#stat-keywords-count`), sentiment donut split, theme priority bars, and RICE rankings.
+
+
 ### 🛡️ Dashboard Content & Insights
 - **Borrower Red Flags & Actionable Insights**: Replaced static impact cards with 3 borrower alerts:
   1. **Floating Rate Reset Trap**: tenure inflation (+5-12 yrs) on bank rate hikes.

@@ -411,6 +411,27 @@ def get_logs():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route("/api/delete-logs", methods=["POST", "DELETE"])
+def delete_logs():
+    try:
+        data = request.get_json(silent=True) or {}
+        delete_all = data.get("all", False)
+        texts = data.get("texts", [])
+        
+        deleted_count = 0
+        if collection is not None:
+            if delete_all:
+                res = collection.delete_many({})
+                deleted_count = res.deleted_count
+            elif texts:
+                res = collection.delete_many({"text": {"$in": texts}})
+                deleted_count = res.deleted_count
+                
+        return jsonify({"success": True, "deletedCount": deleted_count})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # Standalone entry point
 if __name__ == "__main__":
     app.run(port=5000)
+
