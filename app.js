@@ -2267,8 +2267,169 @@ function launchSolutionStudio(gap) {
 
     const formatLower = (gap.format || "").toLowerCase();
 
-    if (formatLower.includes("simulator") || formatLower.includes("prepayment") || formatLower.includes("calculator")) {
-        // Engine 1: Interactive Prepayment & EMI vs Tenure Simulator
+    if (formatLower.includes("foir") || formatLower.includes("affordability")) {
+        // Engine A: Salary Affordability & FOIR Eligibility Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>📊 2026 FOIR Banking Rule:</strong> Indian banks cap total monthly EMI obligations at <strong>50%</strong> (salary < ₹1L/mo) or <strong>60%</strong> (salary ≥ ₹1L/mo) of net in-hand salary.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Gross Monthly In-Hand Salary (₹)</label>
+                        <input type="number" id="foir-salary" value="120000" step="5000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Existing Monthly EMIs / Debts (₹)</label>
+                        <input type="number" id="foir-existing" value="15000" step="2000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Expected Interest Rate (% p.a.)</label>
+                        <input type="number" id="foir-rate" value="8.5" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Loan Tenure (Years)</label>
+                        <input type="number" id="foir-tenure" value="20" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Max Allowed Home Loan EMI</span>
+                        <span class="res-val" id="res-foir-emi" style="color: #10b981;">₹57,000 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-foir-pct">Based on 60% FOIR cap</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-purple);">
+                        <span class="res-label">Max Sanctionable Home Loan Amount</span>
+                        <span class="res-val" id="res-foir-loan" style="color: var(--accent-purple);">₹65,71,280</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Maximum principal bank will disburse</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateFOIR() {
+            const sal = parseFloat(document.getElementById("foir-salary").value) || 120000;
+            const existing = parseFloat(document.getElementById("foir-existing").value) || 15000;
+            const r = (parseFloat(document.getElementById("foir-rate").value) || 8.5) / 12 / 100;
+            const n = (parseFloat(document.getElementById("foir-tenure").value) || 20) * 12;
+
+            const foirCapPct = sal >= 100000 ? 0.60 : 0.50;
+            const maxTotalEmi = sal * foirCapPct;
+            const maxHomeEmi = Math.max(0, maxTotalEmi - existing);
+
+            const maxLoan = (maxHomeEmi * (Math.pow(1 + r, n) - 1)) / (r * Math.pow(1 + r, n));
+
+            document.getElementById("res-foir-emi").textContent = `₹${Math.round(maxHomeEmi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-foir-pct").textContent = `Based on ${(foirCapPct * 100)}% FOIR cap (Salary ₹${(sal/1000).toFixed(0)}k/mo)`;
+            document.getElementById("res-foir-loan").textContent = `₹${Math.round(maxLoan).toLocaleString("en-IN")}`;
+        }
+
+        ["foir-salary", "foir-existing", "foir-rate", "foir-tenure"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateFOIR);
+        });
+
+        recalculateFOIR();
+
+    } else if (formatLower.includes("bt") || formatLower.includes("balance transfer")) {
+        // Engine B: Balance Transfer Net-Savings Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>🔄 Balance Transfer Net-Cost Evaluation:</strong> Calculates interest drop minus switching costs (MOD stamp duty + 18% GST processing fee).
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Current Principal Balance (₹)</label>
+                        <input type="number" id="bt-principal" value="4000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Remaining Tenure (Years)</label>
+                        <input type="number" id="bt-tenure" value="15" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Current Bank Rate (%)</label>
+                        <input type="number" id="bt-curr-rate" value="9.25" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>New Offered BT Rate (%)</label>
+                        <input type="number" id="bt-new-rate" value="8.35" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>New Processing Fee % (+ 18% GST)</label>
+                        <input type="number" id="bt-proc-pct" value="0.25" step="0.05">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Legal, Valuation & MOD Stamp (₹)</label>
+                        <input type="number" id="bt-legal-stamp" value="15000" step="1000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Net Lifetime BT Profit</span>
+                        <span class="res-val" id="res-bt-net-savings" style="color: #10b981;">₹3,41,200</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-bt-cost">After ₹26,800 switching cost</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <span class="res-label">Monthly EMI Reduction</span>
+                        <span class="res-val" id="res-bt-emi-drop" style="color: #f59e0b;">₹2,145 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-bt-breakeven">Breakeven: 13 months</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateBT() {
+            const P = parseFloat(document.getElementById("bt-principal").value) || 4000000;
+            const n = (parseFloat(document.getElementById("bt-tenure").value) || 15) * 12;
+            const rCurr = (parseFloat(document.getElementById("bt-curr-rate").value) || 9.25) / 12 / 100;
+            const rNew = (parseFloat(document.getElementById("bt-new-rate").value) || 8.35) / 12 / 100;
+            const procPct = parseFloat(document.getElementById("bt-proc-pct").value) || 0.25;
+            const legal = parseFloat(document.getElementById("bt-legal-stamp").value) || 15000;
+
+            const emiCurr = (P * rCurr * Math.pow(1 + rCurr, n)) / (Math.pow(1 + rCurr, n) - 1);
+            const emiNew = (P * rNew * Math.pow(1 + rNew, n)) / (Math.pow(1 + rNew, n) - 1);
+
+            const totalCurrInterest = (emiCurr * n) - P;
+            const totalNewInterest = (emiNew * n) - P;
+            const grossInterestSavings = totalCurrInterest - totalNewInterest;
+
+            const procFeeBase = (P * procPct) / 100;
+            const gst18 = procFeeBase * 0.18;
+            const switchingCost = procFeeBase + gst18 + legal;
+
+            const netSavings = grossInterestSavings - switchingCost;
+            const emiDrop = emiCurr - emiNew;
+            const breakevenMonths = emiDrop > 0 ? Math.ceil(switchingCost / emiDrop) : 0;
+
+            document.getElementById("res-bt-net-savings").textContent = `₹${Math.round(netSavings).toLocaleString("en-IN")}`;
+            document.getElementById("res-bt-cost").textContent = `After ₹${Math.round(switchingCost).toLocaleString("en-IN")} switching cost (incl GST)`;
+            document.getElementById("res-bt-emi-drop").textContent = `₹${Math.round(emiDrop).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-bt-breakeven").textContent = `Breakeven: ${breakevenMonths} months`;
+        }
+
+        ["bt-principal", "bt-tenure", "bt-curr-rate", "bt-new-rate", "bt-proc-pct", "bt-legal-stamp"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateBT);
+        });
+
+        recalculateBT();
+
+    } else if (formatLower.includes("prepayment") || formatLower.includes("prepay") || formatLower.includes("emi-vs-tenure")) {
+        // Engine C: Interactive Prepayment & EMI vs Tenure Simulator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
@@ -2358,7 +2519,7 @@ function launchSolutionStudio(gap) {
         recalculateSim();
 
     } else if (formatLower.includes("fee") || formatLower.includes("gst") || formatLower.includes("charges")) {
-        // Engine 2: All-In Fee & 18% GST Cost Calculator
+        // Engine D: All-In Fee & 18% GST Cost Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
@@ -2425,11 +2586,11 @@ function launchSolutionStudio(gap) {
         recalculateFee();
 
     } else if (formatLower.includes("regime") || formatLower.includes("tax") || formatLower.includes("80eea")) {
-        // Engine 3: Old vs New Tax Regime Comparator (FY 2025-26 / 2026 Slabs)
+        // Engine E: Old vs New Tax Regime & 80EEA Window Comparator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
-                    <strong>⚖️ FY 2025-26 / 2026 Tax Rules:</strong> New Tax Regime is the default (₹75k Standard Deduction; Sec 24b self-occupied interest is ₹0). Old Regime allows Sec 24(b) up to ₹2L + 80C ₹1.5L.
+                    <strong>⚖️ FY 2025-26 / 2026 Tax Rules:</strong> New Tax Regime is the default (₹75k Standard Deduction; Sec 24b self-occupied interest is ₹0). Old Regime allows Sec 24(b) up to ₹2L + 80C ₹1.5L. (Section 80EEA window closed March 2022).
                 </div>
 
                 <div class="grid-two-col" style="gap: 16px;">
@@ -2516,7 +2677,7 @@ function launchSolutionStudio(gap) {
         recalculateTax();
 
     } else if (formatLower.includes("checklist")) {
-        // Engine 4: Document Checklist Generator
+        // Engine H: Borrower Document Checklist Generator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div class="studio-input-group" style="margin-bottom: 8px;">
@@ -2581,27 +2742,77 @@ function launchSolutionStudio(gap) {
         renderChecklist();
 
     } else {
-        // Engine 5: RBI Policy & Rights Explainer
+        // Engine Default: Advanced Multi-Scenario Home Loan Calculator
         widgetBox.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-                <div class="studio-result-card" style="border-left: 3px solid #10b981;">
-                    <span class="res-label">RBI Mandate: 0% Foreclosure Penalty</span>
-                    <span class="res-val" style="color: #10b981; font-size: 17px;">Floating Rate Individual Loans</span>
-                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 6px;">
-                        Under RBI Master Directions, banks and HFCs cannot charge any foreclosure fee or prepayment penalty on floating rate home loans taken by individual borrowers.
-                    </p>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>💡 Home Loan Decision & Optimization Engine:</strong> Interactive simulation using benchmark <strong>5.25% RBI Repo rate</strong> and statutory <strong>18% GST</strong> fee rules.
                 </div>
 
-                <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
-                    <span class="res-label">RBI Document Delay Compensation</span>
-                    <span class="res-val" style="color: #f59e0b; font-size: 17px;">₹5,000 / Day Delay Penalty</span>
-                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 6px;">
-                        Banks must release original property deeds within 30 days of full loan repayment. Any delay beyond 30 days mandates a fine payable by bank to borrower at ₹5,000/day.
-                    </p>
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Sanctioned Principal Loan (₹)</label>
+                        <input type="number" id="calc-principal" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" id="calc-rate" value="8.5" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Loan Tenure (Years)</label>
+                        <input type="number" id="calc-tenure" value="20" step="1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Processing Fee % (+18% GST)</label>
+                        <input type="number" id="calc-fee-pct" value="0.5" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-blue);">
+                        <span class="res-label">Monthly EMI Payable</span>
+                        <span class="res-val" id="res-calc-emi" style="color: var(--accent-blue);">₹43,391 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-calc-total-interest">Total Interest: ₹54,13,879</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <span class="res-label">Upfront Processing Fee + GST</span>
+                        <span class="res-val" id="res-calc-fee" style="color: #f59e0b;">₹29,500</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Base ₹25,000 + ₹4,500 GST</span>
+                    </div>
                 </div>
             </div>
         `;
+
+        function recalculateDefault() {
+            const P = parseFloat(document.getElementById("calc-principal").value) || 5000000;
+            const r = (parseFloat(document.getElementById("calc-rate").value) || 8.5) / 12 / 100;
+            const n = (parseFloat(document.getElementById("calc-tenure").value) || 20) * 12;
+            const feePct = parseFloat(document.getElementById("calc-fee-pct").value) || 0.5;
+
+            const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const totalPayment = emi * n;
+            const totalInterest = totalPayment - P;
+
+            const baseFee = (P * feePct) / 100;
+            const gst18 = baseFee * 0.18;
+            const totalFee = baseFee + gst18;
+
+            document.getElementById("res-calc-emi").textContent = `₹${Math.round(emi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-calc-total-interest").textContent = `Total Interest: ₹${Math.round(totalInterest).toLocaleString("en-IN")}`;
+            document.getElementById("res-calc-fee").textContent = `₹${Math.round(totalFee).toLocaleString("en-IN")}`;
+        }
+
+        ["calc-principal", "calc-rate", "calc-tenure", "calc-fee-pct"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateDefault);
+        });
+
+        recalculateDefault();
     }
+
 
     // Populate Customer Article & Embed Code
     const articleHtml = `
