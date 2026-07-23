@@ -1161,3 +1161,35 @@ th.sortable.active::after {
     }
 }
 
+/* Sortable Table Headers */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+th.sortable:hover {
+    color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+th.sortable .sort-icon {
+    display: inline-block;
+    font-size: 11px;
+    margin-left: 4px;
+    opacity: 0.4;
+    transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+th.sortable:hover .sort-icon {
+    opacity: 0.8;
+}
+
+th.sortable.asc .sort-icon,
+th.sortable.desc .sort-icon {
+    opacity: 1;
+    color: var(--accent-blue);
+    font-weight: bold;
+}
+
+

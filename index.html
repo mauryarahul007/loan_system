@@ -323,19 +323,28 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <input type="text" id="search-gap-search" placeholder="Search keywords...">
                         </div>
+                        <div class="select-wrapper">
+                            <select id="search-filter-loantype">
+                                <option value="">All Loan Types</option>
+                                <option value="Home Loan">Home Loan</option>
+                                <option value="Car Loan">Car Loan</option>
+                                <option value="Personal Loan">Personal Loan</option>
+                                <option value="Education Loan">Education Loan</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="table-container">
-                        <table>
+                        <table id="search-gap-table">
                             <thead>
                                 <tr>
-                                    <th>Search Query / Keyword</th>
-                                    <th>Loan Type</th>
-                                    <th class="number">Monthly Search Volume</th>
-                                    <th>Intent Type</th>
-                                    <th class="number">Competitor Answer Quality (1-5)</th>
-                                    <th class="number" style="cursor: help;" title="Gap Score = (Monthly Search Volume / 1000) &times; (5 - Competitor Answer Quality). Higher scores indicate high-volume searches with weak or missing competitor answers.">Gap Score ⓘ</th>
-                                    <th>Proposed Solution Format</th>
+                                    <th class="sortable" data-sort="query">Search Query / Keyword <span class="sort-icon">↕</span></th>
+                                    <th class="sortable" data-sort="loan_type">Loan Type <span class="sort-icon">↕</span></th>
+                                    <th class="sortable number" data-sort="volume">Monthly Search Volume <span class="sort-icon">↕</span></th>
+                                    <th class="sortable" data-sort="type">Intent Type <span class="sort-icon">↕</span></th>
+                                    <th class="sortable number" data-sort="quality">Competitor Answer Quality (1-5) <span class="sort-icon">↕</span></th>
+                                    <th class="sortable number" data-sort="gapScore" style="cursor: pointer;" title="Gap Score = (Monthly Search Volume) &times; (6 - Competitor Answer Quality). Higher scores indicate high-volume searches with weak or missing competitor answers.">Gap Score ⓘ <span class="sort-icon">↕</span></th>
+                                    <th class="sortable" data-sort="format">Proposed Solution Format <span class="sort-icon">↕</span></th>
                                 </tr>
                             </thead>
                             <tbody id="search-table-body">

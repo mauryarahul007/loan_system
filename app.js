@@ -548,35 +548,71 @@ function initCompetitorMatrix() {
     });
 }
 
-// 5. Search Intent Gaps list render & calculation
+// 5. Search Intent Gaps list render, filtering & table column sorting
 function initSearchGaps() {
     const tableBody = document.getElementById("search-table-body");
     const searchInput = document.getElementById("search-gap-search");
+    const loanTypeSelect = document.getElementById("search-filter-loantype");
+    const headers = document.querySelectorAll("#search-gap-table th.sortable");
+    
+    let currentSortCol = "gapScore";
+    let currentSortAsc = false; // Descending by default for gapScore
     
     function renderSearchGaps() {
-        const searchVal = searchInput.value.toLowerCase();
+        const searchVal = searchInput ? searchInput.value.toLowerCase() : "";
+        const loanTypeVal = loanTypeSelect ? loanTypeSelect.value : "";
         tableBody.innerHTML = "";
         
         // Map data, calculating Gap Score dynamically
-        // Formula: Gap = VolumeWeight * (6 - answerQuality)
-        // Let's normalize volume weight. In sheet, the Gap Score is calculated as Volume * (6 - answerQuality)
-        // Since volumes are in thousands, we can display exactly how it is in the sheet, e.g. Volume * (6 - quality)
         const mappedGaps = searchIntentGaps.map(item => {
             const gapScore = item.volume * (6 - item.quality);
             return {
                 ...item,
+                loan_type: item.loan_type || item.loanType || "Home Loan",
                 gapScore: gapScore
             };
-        }).sort((a, b) => b.gapScore - a.gapScore);
+        });
         
+        // Filter data
         const filtered = mappedGaps.filter(item => {
-            return item.query.toLowerCase().includes(searchVal) || 
-                   item.format.toLowerCase().includes(searchVal) ||
-                   item.type.toLowerCase().includes(searchVal);
+            const matchesSearch = item.query.toLowerCase().includes(searchVal) || 
+                                  item.format.toLowerCase().includes(searchVal) ||
+                                  item.type.toLowerCase().includes(searchVal);
+            const matchesLoanType = loanTypeVal === "" || item.loan_type.toLowerCase() === loanTypeVal.toLowerCase();
+            return matchesSearch && matchesLoanType;
+        });
+        
+        // Sort data
+        filtered.sort((a, b) => {
+            let valA = a[currentSortCol];
+            let valB = b[currentSortCol];
+            
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            
+            if (valA < valB) return currentSortAsc ? -1 : 1;
+            if (valA > valB) return currentSortAsc ? 1 : -1;
+            return 0;
+        });
+        
+        // Update header UI sort indicators
+        headers.forEach(th => {
+            const colKey = th.getAttribute("data-sort");
+            const iconSpan = th.querySelector(".sort-icon");
+            th.classList.remove("asc", "desc");
+            
+            if (colKey === currentSortCol) {
+                th.classList.add(currentSortAsc ? "asc" : "desc");
+                if (iconSpan) iconSpan.textContent = currentSortAsc ? "▲" : "▼";
+            } else {
+                if (iconSpan) iconSpan.textContent = "↕";
+            }
         });
         
         if (filtered.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No search gaps found matching query.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="text-align: center; padding: 40px; color: var(--text-muted);">No search gaps found matching the current query & filter.</td></tr>`;
             return;
         }
         
@@ -593,8 +629,7 @@ function initSearchGaps() {
                 }
             }
             
-            // Display formatted Gap Score (Volume weight representation)
-            // If Gap score is high (e.g. > 30000), let's render it bold and color it purple/red
+            // Display formatted Gap Score
             let gapColor = "var(--text-primary)";
             let gapWeight = "600";
             if (item.gapScore >= 35000) {
@@ -604,22 +639,36 @@ function initSearchGaps() {
                 gapColor = "#fb923c"; // orange
             }
             
-            let loanType = item.loanType || "Home Loan";
-            
             tr.innerHTML = `
                 <td style="font-weight: 500; color: var(--text-primary); font-size: 13.5px;"><em>"${item.query}"</em></td>
-                <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${loanType}</span></td>
+                <td><span style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">${item.loan_type}</span></td>
                 <td class="number" style="font-weight: 600;">${item.volume.toLocaleString("en-IN")}</td>
                 <td><span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">${item.type}</span></td>
                 <td class="number" style="white-space: nowrap;">${qualityStars} <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">(${item.quality}/5)</span></td>
-                <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px; cursor: help;" title="Gap Score = (Search Volume / 1000) * (5 - Competitor Answer Quality). A higher score indicates a large, poorly-answered search demand.">${item.gapScore.toLocaleString("en-IN")}</td>
+                <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px; cursor: help;" title="Gap Score = (Search Volume) * (6 - Competitor Answer Quality). A higher score indicates a large, poorly-answered search demand.">${item.gapScore.toLocaleString("en-IN")}</td>
                 <td style="font-weight: 500; color: var(--accent-purple);">${item.format}</td>
             `;
             tableBody.appendChild(tr);
         });
     }
     
-    searchInput.addEventListener("input", renderSearchGaps);
+    // Attach event listeners
+    if (searchInput) searchInput.addEventListener("input", renderSearchGaps);
+    if (loanTypeSelect) loanTypeSelect.addEventListener("change", renderSearchGaps);
+    
+    headers.forEach(th => {
+        th.addEventListener("click", () => {
+            const colKey = th.getAttribute("data-sort");
+            if (colKey === currentSortCol) {
+                currentSortAsc = !currentSortAsc;
+            } else {
+                currentSortCol = colKey;
+                currentSortAsc = colKey === "query" || colKey === "loan_type" || colKey === "type" || colKey === "format";
+            }
+            renderSearchGaps();
+        });
+    });
+    
     renderSearchGaps();
 }
 
