@@ -2221,29 +2221,6 @@ function generateFallbackScanResults(loanType) {
 }
 
 // 7. Solution Studio Controller (Click-to-Build Proposed Solution Engine)
-function launchSolutionStudio(gap) {
-    if (!gap) return;
-
-    // Switch active sidebar menu & tab pane
-    const menuButtons = document.querySelectorAll(".sidebar-menu .menu-item");
-    const tabPanes = document.querySelectorAll(".tab-pane");
-
-    menuButtons.forEach(btn => {
-        if (btn.getAttribute("data-tab") === "solution-studio") {
-            btn.classList.add("active");
-        } else {
-            btn.classList.remove("active");
-        }
-    });
-
-    tabPanes.forEach(pane => {
-        if (pane.id === "tab-solution-studio") {
-            pane.classList.add("active");
-        } else {
-            pane.classList.remove("active");
-        }
-    });
-
 function renderStudioSEOArticle(gap, engineType) {
     const articleBox = document.getElementById("solution-studio-article-box");
     if (!articleBox) return;
@@ -2455,6 +2432,30 @@ function renderStudioSEOArticle(gap, engineType) {
 }
 
 function launchSolutionStudio(gap) {
+    if (!gap) return;
+
+    // Switch active sidebar menu & tab pane
+    const menuButtons = document.querySelectorAll(".sidebar-menu .menu-item");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    menuButtons.forEach(btn => {
+        if (btn.getAttribute("data-tab") === "solution-studio") {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    tabPanes.forEach(pane => {
+        if (pane.id === "tab-solution-studio") {
+            pane.classList.add("active");
+        } else {
+            pane.classList.remove("active");
+        }
+    });
+
+    // Update page header
+    const pageTitle = document.getElementById("page-title");
     const pageSubtitle = document.getElementById("page-subtitle");
     if (pageTitle) pageTitle.textContent = "Solution Studio";
     if (pageSubtitle) pageSubtitle.textContent = `Live customer solution generated for "${gap.query}"`;
