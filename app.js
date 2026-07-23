@@ -341,9 +341,12 @@ function initDashboard() {
             return { lender, count, topTheme };
         }).sort((a, b) => b.count - a.count);
 
-        sortedLenders.slice(0, 3).forEach(item => {
+        sortedLenders.slice(0, 4).forEach(item => {
             const div = document.createElement("div");
-            div.className = "snapshot-item";
+            div.className = "snapshot-item clickable-lender-item";
+            div.style.cursor = "pointer";
+            div.title = `Click to view all ${item.count} captured complaints for ${item.lender}`;
+            
             let badgeColor = "var(--accent-orange)";
             let riskText = "Moderate Friction";
             if (item.count >= 3) {
@@ -352,12 +355,26 @@ function initDashboard() {
             }
             div.innerHTML = `
                 <div class="snapshot-label" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>${item.lender}</span>
+                    <span style="color: var(--accent-blue); text-decoration: underline;">${item.lender} ↗</span>
                     <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: ${badgeColor}; border: 1px solid ${badgeColor}; font-size: 10px; padding: 2px 6px;">${riskText}</span>
                 </div>
                 <div class="snapshot-val" style="font-size: 16px; margin-top: 2px;">${item.count} Consumer Signal${item.count > 1 ? 's' : ''}</div>
                 <div class="snapshot-subtext">Primary Pain: <strong>${item.topTheme}</strong></div>
             `;
+
+            // Click redirection to Social Listening tab filtered by lender name
+            div.addEventListener("click", () => {
+                const socialTabBtn = document.querySelector('.menu-item[data-tab="social"]');
+                if (socialTabBtn) socialTabBtn.click();
+                
+                const searchInput = document.getElementById("social-search");
+                if (searchInput) {
+                    const shortName = item.lender.split(" ")[0].toLowerCase();
+                    searchInput.value = shortName;
+                    searchInput.dispatchEvent(new Event("input"));
+                }
+            });
+
             lenderContainer.appendChild(div);
         });
 
