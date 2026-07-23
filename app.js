@@ -876,7 +876,11 @@ function initSearchGaps() {
                 <td><span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">${item.type}</span></td>
                 <td class="number" style="white-space: nowrap;">${qualityStars} <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">(${item.quality}/5)</span></td>
                 <td class="number" style="color: ${gapColor}; font-weight: ${gapWeight}; font-size: 14.5px; cursor: help;" title="Gap Score = (Search Volume) * (6 - Competitor Answer Quality). A higher score indicates a large, poorly-answered search demand.">${item.gapScore.toLocaleString("en-IN")}</td>
-                <td style="font-weight: 500; color: var(--accent-purple);">${item.format}</td>
+                <td>
+                    <button class="solution-launch-btn btn-launch-solution" data-index="${realIdx}" title="Click to launch & generate interactive solution studio">
+                        ⚡ ${item.format} →
+                    </button>
+                </td>
                 <td style="text-align: center;">
                     <button class="btn-delete-row btn-delete-search" data-index="${realIdx}" title="Delete line item">🗑️</button>
                 </td>
@@ -886,6 +890,16 @@ function initSearchGaps() {
 
         tableBody.querySelectorAll(".row-select-search").forEach(cb => {
             cb.addEventListener("change", updateSelectionState);
+        });
+
+        tableBody.querySelectorAll(".btn-launch-solution").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.getAttribute("data-index"));
+                if (idx >= 0 && idx < searchIntentGaps.length) {
+                    const gap = mappedGaps.find(g => searchIntentGaps.indexOf(g) === idx) || searchIntentGaps[idx];
+                    launchSolutionStudio(gap);
+                }
+            });
         });
 
         tableBody.querySelectorAll(".btn-delete-search").forEach(btn => {
@@ -2174,4 +2188,416 @@ function generateFallbackScanResults(loanType) {
     const scanBtnText = document.getElementById("scan-btn-text");
     if (scanBtnText) scanBtnText.textContent = `Scan Complete (+${addedCount} Added!)`;
 }
+
+// 7. Solution Studio Controller (Click-to-Build Proposed Solution Engine)
+function launchSolutionStudio(gap) {
+    if (!gap) return;
+
+    // Switch active sidebar menu & tab pane
+    const menuButtons = document.querySelectorAll(".sidebar-menu .menu-item");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    menuButtons.forEach(btn => {
+        if (btn.getAttribute("data-tab") === "solution-studio") {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    tabPanes.forEach(pane => {
+        if (pane.id === "tab-solution-studio") {
+            pane.classList.add("active");
+        } else {
+            pane.classList.remove("active");
+        }
+    });
+
+    // Update page header
+    const pageTitle = document.getElementById("page-title");
+    const pageSubtitle = document.getElementById("page-subtitle");
+    if (pageTitle) pageTitle.textContent = "Solution Studio";
+    if (pageSubtitle) pageSubtitle.textContent = `Live customer solution generated for "${gap.query}"`;
+
+    // Populate Studio Header metadata
+    const loanType = gap.loan_type || gap.loanType || "Home Loan";
+    const gapScore = gap.gapScore || (gap.volume * (6 - gap.quality));
+
+    document.getElementById("studio-query-title").textContent = `"${gap.query}"`;
+    document.getElementById("studio-volume-text").textContent = gap.volume.toLocaleString("en-IN");
+    document.getElementById("studio-intent-text").textContent = gap.type;
+    document.getElementById("studio-format-pill").textContent = gap.format;
+    document.getElementById("studio-loan-type-badge").textContent = loanType;
+    document.getElementById("studio-gap-score-badge").textContent = `Gap Score: ${gap.gapScore ? gap.gapScore.toLocaleString("en-IN") : gapScore.toLocaleString("en-IN")}`;
+
+    const widgetBox = document.getElementById("solution-studio-widget-box");
+    const articleBox = document.getElementById("solution-studio-article-box");
+    const embedBox = document.getElementById("solution-studio-embed-code");
+
+    const formatLower = (gap.format || "").toLowerCase();
+
+    if (formatLower.includes("simulator") || formatLower.includes("prepayment") || formatLower.includes("calculator")) {
+        // Engine 1: Interactive Prepayment & EMI vs Tenure Simulator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>💡 Prepayment Decision Guide (2026 Benchmark Rate: 5.25% RBI Repo):</strong> Lowering tenure saves maximum total interest, while lowering EMI boosts monthly cash flow.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Home Loan Balance (₹)</label>
+                        <input type="number" id="sim-principal" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" id="sim-rate" value="8.5" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Remaining Tenure (Years)</label>
+                        <input type="number" id="sim-tenure" value="20" step="1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Lump-Sum Prepayment Amount (₹)</label>
+                        <input type="number" id="sim-prepay" value="500000" step="50000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Option A: Reduce Tenure (Keep EMI Same)</span>
+                        <span class="res-val" id="res-tenure-savings" style="color: #10b981;">₹14,82,105</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-tenure-months">Cuts loan by 42 months (3.5 yrs)</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-blue);">
+                        <span class="res-label">Option B: Reduce EMI (Keep Tenure Same)</span>
+                        <span class="res-val" id="res-new-emi" style="color: var(--accent-blue);">₹39,012 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-emi-drop">Monthly savings: ₹4,334 / mo</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateSim() {
+            const P = parseFloat(document.getElementById("sim-principal").value) || 5000000;
+            const r = (parseFloat(document.getElementById("sim-rate").value) || 8.5) / 12 / 100;
+            const n = (parseFloat(document.getElementById("sim-tenure").value) || 20) * 12;
+            const prepay = parseFloat(document.getElementById("sim-prepay").value) || 500000;
+
+            const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const totalOrigInterest = (emi * n) - P;
+
+            const newP = Math.max(0, P - prepay);
+            const newEmi = (newP * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const emiDrop = emi - newEmi;
+
+            let balance = newP;
+            let months = 0;
+            let totalNewInterest = 0;
+            while (balance > 0 && months < n) {
+                const interest = balance * r;
+                const principalPaid = emi - interest;
+                if (principalPaid >= balance) {
+                    totalNewInterest += interest;
+                    balance = 0;
+                } else {
+                    totalNewInterest += interest;
+                    balance -= principalPaid;
+                }
+                months++;
+            }
+
+            const interestSaved = Math.max(0, totalOrigInterest - totalNewInterest);
+            const monthsSaved = Math.max(0, n - months);
+
+            document.getElementById("res-tenure-savings").textContent = `₹${Math.round(interestSaved).toLocaleString("en-IN")}`;
+            document.getElementById("res-tenure-months").textContent = `Cuts loan by ${monthsSaved} months (${(monthsSaved / 12).toFixed(1)} yrs)`;
+            document.getElementById("res-new-emi").textContent = `₹${Math.round(newEmi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-emi-drop").textContent = `Monthly EMI drop: ₹${Math.round(emiDrop).toLocaleString("en-IN")} / mo`;
+        }
+
+        ["sim-principal", "sim-rate", "sim-tenure", "sim-prepay"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateSim);
+        });
+
+        recalculateSim();
+
+    } else if (formatLower.includes("fee") || formatLower.includes("gst") || formatLower.includes("charges")) {
+        // Engine 2: All-In Fee & 18% GST Cost Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>ℹ️ 2026 Statutory GST Clarification:</strong> 18% GST applies strictly to bank processing fees & legal charges. Principal & EMI interest carry <strong>0% GST</strong>.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Sanctioned Loan Amount (₹)</label>
+                        <input type="number" id="fee-loan-amt" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Bank Quoted Processing Fee (%)</label>
+                        <input type="number" id="fee-proc-pct" value="0.5" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Legal & Title Valuation Fee (₹)</label>
+                        <input type="number" id="fee-legal-val" value="10000" step="1000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>MOD Stamp Duty / CERSAI Charge (₹)</label>
+                        <input type="number" id="fee-mod-stamp" value="15000" step="1000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #f43f5e;">
+                        <span class="res-label">Base Bank Processing Fee</span>
+                        <span class="res-val" id="res-base-proc">₹25,000</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-gst-tax">+ 18% GST: ₹4,500</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <span class="res-label">Total Upfront Cash Outflow</span>
+                        <span class="res-val" id="res-total-outflow" style="color: #f59e0b;">₹54,500</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Includes GST + Legal + MOD Stamp</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateFee() {
+            const loan = parseFloat(document.getElementById("fee-loan-amt").value) || 5000000;
+            const procPct = parseFloat(document.getElementById("fee-proc-pct").value) || 0.5;
+            const legal = parseFloat(document.getElementById("fee-legal-val").value) || 10000;
+            const mod = parseFloat(document.getElementById("fee-mod-stamp").value) || 15000;
+
+            const baseProc = (loan * procPct) / 100;
+            const gst18 = baseProc * 0.18;
+            const totalOutflow = baseProc + gst18 + legal + mod;
+
+            document.getElementById("res-base-proc").textContent = `₹${Math.round(baseProc).toLocaleString("en-IN")}`;
+            document.getElementById("res-gst-tax").textContent = `+ 18% GST: ₹${Math.round(gst18).toLocaleString("en-IN")}`;
+            document.getElementById("res-total-outflow").textContent = `₹${Math.round(totalOutflow).toLocaleString("en-IN")}`;
+        }
+
+        ["fee-loan-amt", "fee-proc-pct", "fee-legal-val", "fee-mod-stamp"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateFee);
+        });
+
+        recalculateFee();
+
+    } else if (formatLower.includes("regime") || formatLower.includes("tax") || formatLower.includes("80eea")) {
+        // Engine 3: Old vs New Tax Regime Comparator (FY 2025-26 / 2026 Slabs)
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>⚖️ FY 2025-26 / 2026 Tax Rules:</strong> New Tax Regime is the default (₹75k Standard Deduction; Sec 24b self-occupied interest is ₹0). Old Regime allows Sec 24(b) up to ₹2L + 80C ₹1.5L.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Gross Annual Income (₹)</label>
+                        <input type="number" id="tax-income" value="1500000" step="50000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Annual Home Loan Interest Paid (₹)</label>
+                        <input type="number" id="tax-interest" value="200000" step="10000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Sec 80C Principal + EPF/PPF (₹)</label>
+                        <input type="number" id="tax-80c" value="150000" step="10000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Property Status</label>
+                        <select id="tax-prop-type">
+                            <option value="self">Self-Occupied (Sec 24b cap ₹2L in Old)</option>
+                            <option value="letout">Let-Out / Rented (Sec 24b uncapped in Old)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-purple);">
+                        <span class="res-label">Old Tax Regime Liability</span>
+                        <span class="res-val" id="res-old-tax">₹1,48,200</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-old-deduct">Total Deductions: ₹4,00,000</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">New Default Regime Liability</span>
+                        <span class="res-val" id="res-new-tax" style="color: #10b981;">₹1,30,000</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Standard Deduction: ₹75,000</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateTax() {
+            const income = parseFloat(document.getElementById("tax-income").value) || 1500000;
+            const interest = Math.min(200000, parseFloat(document.getElementById("tax-interest").value) || 200000);
+            const c80 = Math.min(150000, parseFloat(document.getElementById("tax-80c").value) || 150000);
+
+            const oldTaxable = Math.max(0, income - 50000 - interest - c80);
+            let oldTax = 0;
+            if (oldTaxable > 1000000) {
+                oldTax = 112500 + (oldTaxable - 1000000) * 0.3;
+            } else if (oldTaxable > 500000) {
+                oldTax = 12500 + (oldTaxable - 500000) * 0.2;
+            } else if (oldTaxable > 250000) {
+                oldTax = (oldTaxable - 250000) * 0.05;
+            }
+            oldTax = oldTax * 1.04;
+
+            const newTaxable = Math.max(0, income - 75000);
+            let newTax = 0;
+            if (newTaxable > 1500000) {
+                newTax = 150000 + (newTaxable - 1500000) * 0.3;
+            } else if (newTaxable > 1200000) {
+                newTax = 90000 + (newTaxable - 1200000) * 0.2;
+            } else if (newTaxable > 900000) {
+                newTax = 45000 + (newTaxable - 900000) * 0.15;
+            } else if (newTaxable > 700000) {
+                newTax = 15000 + (newTaxable - 700000) * 0.1;
+            } else if (newTaxable > 300000) {
+                newTax = (newTaxable - 300000) * 0.05;
+            }
+            newTax = newTax * 1.04;
+
+            document.getElementById("res-old-tax").textContent = `₹${Math.round(oldTax).toLocaleString("en-IN")}`;
+            document.getElementById("res-old-deduct").textContent = `Total Deductions: ₹${(50000 + interest + c80).toLocaleString("en-IN")}`;
+            document.getElementById("res-new-tax").textContent = `₹${Math.round(newTax).toLocaleString("en-IN")}`;
+        }
+
+        ["tax-income", "tax-interest", "tax-80c", "tax-prop-type"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateTax);
+        });
+
+        recalculateTax();
+
+    } else if (formatLower.includes("checklist")) {
+        // Engine 4: Document Checklist Generator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="studio-input-group" style="margin-bottom: 8px;">
+                    <label>Select Borrower Profile</label>
+                    <select id="chk-profile-select">
+                        <option value="salaried">Salaried Employee (MNC / Govt / Pvt)</option>
+                        <option value="self">Self-Employed Businessman / Professional</option>
+                        <option value="nri">NRI Borrower (Non-Resident Indian)</option>
+                    </select>
+                </div>
+
+                <div id="chk-items-container" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        `;
+
+        const checklists = {
+            salaried: [
+                "PAN Card & Aadhaar / Passport (Identity & Address Proof)",
+                "Last 3 Months Salary Slips with Component Breakdown",
+                "Form 16 for Last 2 Financial Years from Employer",
+                "Bank Account Statements for Last 6 Months (Salary Credit)",
+                "Approved Building Plan & Sale Agreement / Allotment Letter",
+                "NOC from Builder / Society & Copy of Property Title Deed"
+            ],
+            self: [
+                "PAN Card & Aadhaar / Passport (Identity & Address Proof)",
+                "ITR with Computation of Income for Last 3 Financial Years",
+                "CA Audited Balance Sheet & Profit/Loss Statement (3 Yrs)",
+                "Current & Savings Account Statements for Last 12 Months",
+                "Business License / GST Registration / Shop Establishment Proof",
+                "Property Encumbrance Certificate (EC) for 13-30 Years"
+            ],
+            nri: [
+                "Valid Passport & Indian Visa / OCI / PIO Card",
+                "NRE / NRO Bank Account Statements for Last 6 Months",
+                "Overseas Employment Contract & Last 3 Months Pay Slips",
+                "Power of Attorney (POA) Executed in India / Indian Consulate",
+                "Credit Bureau Report from Country of Residence (Equifax/Experian)"
+            ]
+        };
+
+        function renderChecklist() {
+            const prof = document.getElementById("chk-profile-select").value || "salaried";
+            const items = checklists[prof] || checklists.salaried;
+            const container = document.getElementById("chk-items-container");
+            container.innerHTML = "";
+
+            items.forEach((itemText, i) => {
+                const div = document.createElement("div");
+                div.className = "checklist-item-card";
+                div.innerHTML = `
+                    <input type="checkbox" id="chk-item-${i}" checked>
+                    <label for="chk-item-${i}" style="font-size: 13px; color: var(--text-primary); cursor: pointer;">${itemText}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        document.getElementById("chk-profile-select").addEventListener("change", renderChecklist);
+        renderChecklist();
+
+    } else {
+        // Engine 5: RBI Policy & Rights Explainer
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                    <span class="res-label">RBI Mandate: 0% Foreclosure Penalty</span>
+                    <span class="res-val" style="color: #10b981; font-size: 17px;">Floating Rate Individual Loans</span>
+                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 6px;">
+                        Under RBI Master Directions, banks and HFCs cannot charge any foreclosure fee or prepayment penalty on floating rate home loans taken by individual borrowers.
+                    </p>
+                </div>
+
+                <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                    <span class="res-label">RBI Document Delay Compensation</span>
+                    <span class="res-val" style="color: #f59e0b; font-size: 17px;">₹5,000 / Day Delay Penalty</span>
+                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 6px;">
+                        Banks must release original property deeds within 30 days of full loan repayment. Any delay beyond 30 days mandates a fine payable by bank to borrower at ₹5,000/day.
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+
+    // Populate Customer Article & Embed Code
+    const articleHtml = `
+        <h4 style="color: #f59e0b; margin-top: 0;">Borrower Action Guide: ${gap.query}</h4>
+        <p>When searching for <em>"${gap.query}"</em>, Indian home loan borrowers are looking for clear, unbiased guidance regarding their loan structure, tax impact, and total out-of-pocket expenses.</p>
+        
+        <h5>Key Takeaways for 2026:</h5>
+        <ul>
+            <li><strong>2026 Interest Rate Environment:</strong> Benchmark RBI Repo rate sits at <strong>5.25%</strong>. Floating rate loan resets should be evaluated against monthly EMI impact vs tenure expansion.</li>
+            <li><strong>Fee & GST Slabs:</strong> Processing fees attract <strong>18% GST</strong>. Always demand an itemized breakup of legal, valuation, and MOD stamp duty charges upfront.</li>
+            <li><strong>Tax Regime Optimization:</strong> Under the FY 2025-26 / 2026 default New Tax Regime, home loan interest deductions under Sec 24(b) are ₹0 for self-occupied properties. Evaluate if switching to the Old Regime unlocks ₹2,00,000 interest + ₹1,50,000 Sec 80C benefits.</li>
+        </ul>
+    `;
+    articleBox.innerHTML = articleHtml;
+
+    const embedSnippet = `<!-- Customer Portal Embed: ${gap.query} -->\n<div class="home-loan-widget" data-tool="${gap.format}" data-query="${gap.query}" data-repo-rate="5.25%" data-gst="18%">\n  <script src="https://homeloanhub.in/widgets/v1/solution-engine.js" async></script>\n</div>`;
+    embedBox.textContent = embedSnippet;
+
+    const copyBtn = document.getElementById("btn-copy-solution-code");
+    if (copyBtn) {
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(embedSnippet).then(() => {
+                copyBtn.textContent = "✓ Copied to Clipboard!";
+                setTimeout(() => { copyBtn.textContent = "📋 Copy HTML Embed Code"; }, 2500);
+            });
+        };
+    }
+}
+
 

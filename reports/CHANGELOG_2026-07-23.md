@@ -28,6 +28,19 @@ Summary of all features, enhancements, design updates, and security audits compl
 - **Database Cleaning Endpoint (`/api/delete-logs`)**: Added `POST /api/delete-logs` backend endpoint in `server.py` and `api/index.py` for single/batch deletion and full database purge (`Clean DB / Purge All`).
 - **Dynamic Stats & Chart Recalculation**: Deleting items automatically updates total comments (`#stat-comments-count`), keywords count (`#stat-keywords-count`), sentiment donut split, theme priority bars, and RICE rankings.
 
+### ⚡ Solution Studio & Click-to-Build Solution Generator
+- **Interactive Solution Launchers (`⚡ Proposed Solution Format →`)**: Transformed static proposed solution cells in the Search Intent Gaps table into 1-click solution launcher buttons.
+- **Dedicated Solution Studio Tab (`#tab-solution-studio`)**: Added an interactive Solution Studio view with context headers, live market parameters, and instant solution engine mounting.
+- **5 Built-in Interactive Customer Solution Engines**:
+  1. *EMI vs Tenure Prepayment Simulator* (with real interest savings calculation).
+  2. *All-In Fee & 18% GST Cost Calculator* (separating tax-exempt EMI interest from 18% GST processing fees).
+  3. *Regime-Aware Tax Comparator* (incorporating FY 2025-26 / 2026 default New Tax Regime slabs and ₹75k standard deduction).
+  4. *Borrower Document Checklist Generator* (profile-based for Salaried, Self-Employed, and NRI).
+  5. *RBI Policy & Foreclosure Rights Explainer* (0% foreclosure fee waiver & ₹5,000/day document delay compensation).
+- **2026 Live Market Parameters**: Integrated live 2026 Indian market parameters (Repo Rate 5.25%, 18% GST slab, FY 2025-26 default tax regime rules, RBI floating rate waiver).
+- **Customer Embed Code Generator**: Includes copyable HTML embed code snippets for deploying generated solution tools directly to customer web portals.
+
+
 
 ## 🛡️ Dashboard Content & Insights
 - **Borrower Red Flags & Actionable Insights**: Replaced static impact cards with 3 borrower alerts:
