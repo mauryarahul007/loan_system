@@ -234,6 +234,39 @@
                         </div>
                     </div>
 
+                    <!-- Consumer Financial Impact & Lender Friction Grid -->
+                    <div class="grid-two-col">
+                        <!-- Consumer Financial Impact Metrics -->
+                        <div class="dashboard-panel">
+                            <h2>Consumer Financial Impact Analytics</h2>
+                            <div class="snapshot-list">
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Avg Prepayment Interest Savings</div>
+                                    <div class="snapshot-val gradient-text" id="consumer-avg-savings">₹18.45 Lakhs</div>
+                                    <div class="snapshot-subtext">Achieved on ₹50L loan (20 yr) by making 5% annual prepayments</div>
+                                </div>
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Hidden Charges & Fee Shock Burden</div>
+                                    <div class="snapshot-val" style="color: var(--accent-red);" id="consumer-fee-shock">1.18% of Principal</div>
+                                    <div class="snapshot-subtext">Unquoted processing fee + 18% GST + rate reset administrative fees</div>
+                                </div>
+                                <div class="snapshot-item">
+                                    <div class="snapshot-label">Foreclosure Document Release Friction</div>
+                                    <div class="snapshot-val" style="color: var(--accent-orange);" id="consumer-deed-delay">32% Delay Rate</div>
+                                    <div class="snapshot-subtext">Borrowers reporting 30+ day delays in retrieving original property deeds</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lender Complaint & Friction Index -->
+                        <div class="dashboard-panel">
+                            <h2>Top Lenders Consumer Complaint Index</h2>
+                            <div class="snapshot-list" id="lender-complaint-index">
+                                <!-- Populated dynamically via JS -->
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Themes list -->
                     <div class="dashboard-panel full-width">
                         <h2>Pain-Point Themes & Severity</h2>

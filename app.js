@@ -308,6 +308,63 @@ function initDashboard() {
         `;
         themeContainer.appendChild(item);
     });
+
+    // Compute Lender Complaint Index
+    const lenderMap = {};
+    const lenderThemes = {};
+    const knownLenders = ["SBI Home Loans", "HDFC Bank", "ICICI Bank", "Axis Bank", "Bajaj Finserv", "Piramal Finance", "Canara Bank", "PNB Housing", "LIC HFL", "IDFC First Bank"];
+
+    socialLog.forEach(item => {
+        const txt = item.text.toLowerCase();
+        let matchedLender = null;
+        for (const lender of knownLenders) {
+            const shortName = lender.split(" ")[0].toLowerCase();
+            if (txt.includes(shortName)) {
+                matchedLender = lender;
+                break;
+            }
+        }
+        if (matchedLender) {
+            lenderMap[matchedLender] = (lenderMap[matchedLender] || 0) + 1;
+            if (!lenderThemes[matchedLender]) lenderThemes[matchedLender] = {};
+            lenderThemes[matchedLender][item.theme] = (lenderThemes[matchedLender][item.theme] || 0) + 1;
+        }
+    });
+
+    const lenderContainer = document.getElementById("lender-complaint-index");
+    if (lenderContainer) {
+        lenderContainer.innerHTML = "";
+        const sortedLenders = Object.keys(lenderMap).map(lender => {
+            const count = lenderMap[lender];
+            const themesObj = lenderThemes[lender] || {};
+            const topTheme = Object.keys(themesObj).sort((a, b) => themesObj[b] - themesObj[a])[0] || "General complaint";
+            return { lender, count, topTheme };
+        }).sort((a, b) => b.count - a.count);
+
+        sortedLenders.slice(0, 3).forEach(item => {
+            const div = document.createElement("div");
+            div.className = "snapshot-item";
+            let badgeColor = "var(--accent-orange)";
+            let riskText = "Moderate Friction";
+            if (item.count >= 3) {
+                badgeColor = "var(--accent-red)";
+                riskText = "High Friction Flag";
+            }
+            div.innerHTML = `
+                <div class="snapshot-label" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${item.lender}</span>
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: ${badgeColor}; border: 1px solid ${badgeColor}; font-size: 10px; padding: 2px 6px;">${riskText}</span>
+                </div>
+                <div class="snapshot-val" style="font-size: 16px; margin-top: 2px;">${item.count} Consumer Signal${item.count > 1 ? 's' : ''}</div>
+                <div class="snapshot-subtext">Primary Pain: <strong>${item.topTheme}</strong></div>
+            `;
+            lenderContainer.appendChild(div);
+        });
+
+        if (sortedLenders.length === 0) {
+            lenderContainer.innerHTML = `<div style="color: var(--text-muted); padding: 12px;">No lender complaint signals mapped.</div>`;
+        }
+    }
     
     // Fire animations
     setTimeout(animateCharts, 100);
