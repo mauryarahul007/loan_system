@@ -2684,7 +2684,7 @@ Date: ${todayStr}`;
 
         recalculateDraft();
 
-    } else if (formatLower.includes("multi-prepayment") || formatLower.includes("part payment")) {
+    } else if (formatLower.includes("multi-prepayment") || formatLower.includes("part payment") || formatLower.includes("compounding") || formatLower.includes("annual prepayment")) {
         // Engine 2: Multi-Prepayment Annual Savings Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
