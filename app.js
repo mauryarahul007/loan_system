@@ -2777,7 +2777,7 @@ Date: ${todayStr}`;
 
         recalculateMultiPrepay();
 
-    } else if (formatLower.includes("payoff-strategy") || formatLower.includes("reduce home loan tenure")) {
+    } else if (formatLower.includes("payoff-strategy") || formatLower.includes("reduce home loan tenure") || formatLower.includes("prepayment calculator") || formatLower.includes("interactive prepayment")) {
         // Engine 3: Loan Payoff Strategy & Tenure Acceleration Engine
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3269,6 +3269,43 @@ Date: ${todayStr}`;
             </div>
         `;
 
+    } else if (formatLower.includes("journey") || formatLower.includes("step-by-step") || formatLower.includes("walkthrough") || formatLower.includes("roadmap")) {
+        // Engine: Step-by-Step Home Loan Disbursal Roadmap
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>🗺️ Complete 6-Phase Indian Home Loan Journey:</strong> Step-by-step roadmap from initial credit application to full loan payoff and title deed recovery.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #3b82f6;">
+                        <span class="res-label">Phase 1: Pre-Approval & Sanction (Days 1–7)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">CIBIL score check (>750), FOIR eligibility assessment, income doc verification, and formal Sanction Letter issuance.</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #a855f7;">
+                        <span class="res-label">Phase 2: Property Legal & Technical Valuation (Days 8–15)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">Bank panel lawyer title search (30-year chain), physical valuation inspection, and Encumbrance Certificate (EC) check.</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <span class="res-label">Phase 3: Loan Agreement & MOD Registration (Days 16–21)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">Signing loan agreement, Memorandum of Deposit of Title Deeds (MOD) registration at Sub-Registrar office, and CERSAI charge creation.</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Phase 4: Disbursal & Pre-EMI Phase (Days 22–30)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">Bank issues cheque / RTGS to seller/builder. Construction-linked stages charge Pre-EMI interest until final tranche.</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #ec4899;">
+                        <span class="res-label">Phase 5: Amortization & Part-Prepayments (Years 1–20)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">Monthly EMI auto-debit via NACH/ECS. Optional annual prepayments to accelerate principal reduction.</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #06b6d4;">
+                        <span class="res-label">Phase 6: Final Deed Return & CERSAI De-registration (Post-Closure)</span>
+                        <span style="font-size: 12.5px; color: var(--text-secondary);">Bank issues No Dues Certificate (NOC), clears CERSAI lien, and returns original property title deeds within statutory 30-day RBI limit.</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
     } else if (formatLower.includes("rights explainer") || formatLower.includes("foreclosure") || formatLower.includes("floating-rate waiver")) {
         // Engine 10: RBI Floating-Rate Foreclosure Rights Explainer
         widgetBox.innerHTML = `
@@ -3490,6 +3527,75 @@ Date: ${todayStr}`;
         });
 
         recalculateDisbursed();
+
+    } else if (formatLower.includes("fee") || formatLower.includes("gst") || formatLower.includes("cost") || formatLower.includes("charges")) {
+        // Engine: All-In Processing Fee & 18% GST Breakdown Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>💳 GST Banking Statutory Rule:</strong> 18% GST applies to bank processing fees, legal/technical valuation fees, and admin charges (0% GST on loan principal and interest EMI).
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Sanctioned Loan Principal (₹)</label>
+                        <input type="number" id="fee-principal" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Bank Processing Fee Rate (%)</label>
+                        <input type="number" id="fee-proc-rate" value="0.50" step="0.05">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Legal & Valuation Charges (₹)</label>
+                        <input type="number" id="fee-legal" value="7500" step="500">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>MOD Stamp Duty Charges (₹)</label>
+                        <input type="number" id="fee-mod" value="15000" step="1000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #f43f5e;">
+                        <span class="res-label">Total Out-of-Pocket Bank Fees & GST</span>
+                        <span class="res-val" id="res-fee-total" style="color: #f43f5e;">₹53,350 Total Outflow</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-fee-gst-breakdown">Includes 18% GST (₹5,850) on bank fees</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Effective All-In Initial Outflow</span>
+                        <span class="res-val" id="res-fee-effective-pct" style="color: #10b981;">1.07% of Loan</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Transparent pre-sanction breakdown</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateFeeGST() {
+            const P = parseFloat(document.getElementById("fee-principal").value) || 5000000;
+            const procPct = parseFloat(document.getElementById("fee-proc-rate").value) || 0.5;
+            const legal = parseFloat(document.getElementById("fee-legal").value) || 7500;
+            const mod = parseFloat(document.getElementById("fee-mod").value) || 15000;
+
+            const baseProcFee = (P * procPct) / 100;
+            const taxableServices = baseProcFee + legal;
+            const gst18 = taxableServices * 0.18;
+            const totalOutflow = baseProcFee + legal + mod + gst18;
+            const totalPct = (totalOutflow / P) * 100;
+
+            document.getElementById("res-fee-total").textContent = `₹${Math.round(totalOutflow).toLocaleString("en-IN")}`;
+            document.getElementById("res-fee-gst-breakdown").textContent = `Proc Fee ₹${Math.round(baseProcFee).toLocaleString("en-IN")} + 18% GST (₹${Math.round(gst18).toLocaleString("en-IN")}) + MOD ₹${Math.round(mod).toLocaleString("en-IN")}`;
+            document.getElementById("res-fee-effective-pct").textContent = `${totalPct.toFixed(2)}% of Loan Amount`;
+        }
+
+        ["fee-principal", "fee-proc-rate", "fee-legal", "fee-mod"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateFeeGST);
+        });
+
+        recalculateFeeGST();
 
     } else if (formatLower.includes("regime") || formatLower.includes("tax")) {
         // Engine 12: Old vs New Tax Regime Comparator
