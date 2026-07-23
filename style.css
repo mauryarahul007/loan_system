@@ -1,25 +1,27 @@
-/* Global Design Tokens & Variables */
+/* Global Design Tokens & Variables - Cyberpunk Neon Slate Theme */
 :root {
-    --bg-dark: #070a13;
-    --bg-sidebar: rgba(11, 15, 30, 0.7);
-    --bg-card: rgba(22, 28, 48, 0.45);
-    --bg-card-hover: rgba(30, 39, 68, 0.6);
+    --bg-dark: #060911;
+    --bg-sidebar: rgba(10, 16, 28, 0.75);
+    --bg-card: rgba(15, 23, 42, 0.6);
+    --bg-card-hover: rgba(24, 35, 60, 0.8);
     
-    --border-color: rgba(255, 255, 255, 0.07);
-    --border-hover: rgba(255, 255, 255, 0.15);
+    --border-color: rgba(0, 242, 254, 0.14);
+    --border-hover: rgba(0, 242, 254, 0.35);
     
-    --text-primary: #f1f3f9;
+    --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
     
-    --accent-purple: #8b5cf6;
-    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-blue: #00f2fe;
+    --accent-cyan: #06b6d4;
     --accent-green: #10b981;
-    --accent-red: #ef4444;
-    --accent-orange: #f59e0b;
+    --accent-red: #f43f5e;
+    --accent-orange: #fb923c;
     
-    --purple-glow: rgba(139, 92, 246, 0.15);
-    --blue-glow: rgba(59, 130, 246, 0.15);
+    --purple-glow: rgba(168, 85, 247, 0.2);
+    --blue-glow: rgba(0, 242, 254, 0.25);
+    --cyan-glow: rgba(6, 182, 212, 0.2);
     
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
@@ -71,8 +73,8 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     min-height: 100vh;
     background-image: 
-        radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-        radial-gradient(at 90% 80%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
+        radial-gradient(at 10% 20%, rgba(0, 242, 254, 0.09) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(168, 85, 247, 0.09) 0px, transparent 50%);
     background-attachment: fixed;
 }
 
