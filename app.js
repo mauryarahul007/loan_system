@@ -3008,6 +3008,80 @@ function launchSolutionStudio(gap) {
         document.getElementById("chk-profile-select").addEventListener("change", renderChecklist);
         renderChecklist();
 
+    } else if (formatLower.includes("sanction") || formatLower.includes("disbursed")) {
+        // Engine: Sanctioned vs Disbursed Amount Tranche Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>📊 Tranche & Disbursal Banking Rule:</strong> Interest is charged ONLY on the <strong>disbursed amount</strong> (e.g. ₹20L initial tranche for under-construction/plot stage), NOT the total sanctioned loan limit (₹50L).
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Sanctioned Loan Limit (₹)</label>
+                        <input type="number" id="sanc-limit" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Currently Disbursed Amount (₹)</label>
+                        <input type="number" id="disb-amount" value="2000000" step="100000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" id="disb-rate" value="8.5" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Full Loan Tenure (Years)</label>
+                        <input type="number" id="disb-tenure" value="20" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Pre-EMI Monthly Interest (Disbursed)</span>
+                        <span class="res-val" id="res-disb-pre-emi" style="color: #10b981;">₹14,167 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pct">Interest charged on 40% disbursed amount (₹20,00,000)</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-blue);">
+                        <span class="res-label">Full Sanctioned EMI (Post-Possession)</span>
+                        <span class="res-val" id="res-disb-full-emi" style="color: var(--accent-blue);">₹43,391 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pending">Undisbursed Sanction Balance: ₹30,00,000</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateDisbursed() {
+            const sanc = parseFloat(document.getElementById("sanc-limit").value) || 5000000;
+            const disb = parseFloat(document.getElementById("disb-amount").value) || 2000000;
+            const rVal = parseFloat(document.getElementById("disb-rate").value) || 8.5;
+            const r = rVal / 12 / 100;
+            const n = (parseFloat(document.getElementById("disb-tenure").value) || 20) * 12;
+
+            // Pre-EMI is simple monthly interest on disbursed amount
+            const preEmi = disb * r;
+
+            // Full EMI on sanctioned amount
+            const fullEmi = (sanc * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+            const disbPct = ((disb / sanc) * 100).toFixed(0);
+            const pendingBal = Math.max(0, sanc - disb);
+
+            document.getElementById("res-disb-pre-emi").textContent = `₹${Math.round(preEmi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-disb-pct").textContent = `Pre-EMI interest charged on ${disbPct}% disbursed (₹${disb.toLocaleString("en-IN")})`;
+            document.getElementById("res-disb-full-emi").textContent = `₹${Math.round(fullEmi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-disb-pending").textContent = `Undisbursed Sanction Limit: ₹${pendingBal.toLocaleString("en-IN")} (Save ₹${Math.round(fullEmi - preEmi).toLocaleString("en-IN")}/mo cashflow in Pre-EMI)`;
+        }
+
+        ["sanc-limit", "disb-amount", "disb-rate", "disb-tenure"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateDisbursed);
+        });
+
+        recalculateDisbursed();
+
     } else if (formatLower.includes("regime") || formatLower.includes("tax")) {
         // Engine 12: Old vs New Tax Regime Comparator
         widgetBox.innerHTML = `
