@@ -2244,8 +2244,217 @@ function launchSolutionStudio(gap) {
         }
     });
 
-    // Update page header
-    const pageTitle = document.getElementById("page-title");
+function renderStudioSEOArticle(gap, engineType) {
+    const articleBox = document.getElementById("solution-studio-article-box");
+    if (!articleBox) return;
+
+    const loanType = gap.loan_type || gap.loanType || "Home Loan";
+    const queryStr = gap.query || "loan calculation and rules";
+
+    let guideTitle = "";
+    let guideSummary = "";
+    let takeaway1 = "";
+    let takeaway2 = "";
+    let takeaway3 = "";
+    let takeaway4 = "";
+    let actionTip = "";
+
+    switch (engineType) {
+        case "FOIR_ENGINE":
+            guideTitle = `Salary FOIR & ${loanType} Eligibility Guide`;
+            guideSummary = `When evaluating eligibility for "${queryStr}", Indian banks use Fixed Obligation to Income Ratio (FOIR) to determine the maximum loan principal they can disburse.`;
+            takeaway1 = `<strong>2026 FOIR Banking Caps:</strong> Banks enforce a <strong>50% cap</strong> for monthly net in-hand salary below ₹1,00,000, and up to <strong>60% cap</strong> for salaries ₹1,00,000 and above.`;
+            takeaway2 = `<strong>Existing Debt Obligations:</strong> Car loans, personal loans, and credit card EMIs reduce your FOIR headroom rupee-for-rupee. Clearing short-term debt boosts loan sanction limits instantly.`;
+            takeaway3 = `<strong>Co-Applicant Pooling:</strong> Adding an earning spouse or co-owner pools gross income, increasing total sanctionable limit by up to 80%.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Request your bank to include non-salary regular income (bonuses, rental yield, dividends) to stretch FOIR eligibility.`;
+            break;
+
+        case "SPREAD_ENGINE":
+            guideTitle = `Banking Spread Arbitrage & Repo Rate Reset Guide`;
+            guideSummary = `When searching for "${queryStr}", borrowers often discover that their floating interest rate does not decrease when RBI cuts the benchmark Repo Rate (5.25%).`;
+            takeaway1 = `<strong>Spread Hike Trap:</strong> Banks frequently keep baseline interest rates high for existing borrowers by quietly raising their internal <strong>lender spread / margin over repo</strong>.`;
+            takeaway2 = `<strong>New Customer Rate Disparity:</strong> New borrowers receive lower spreads (e.g. Repo 5.25% + 3.10% = 8.35%), while existing borrowers pay higher spreads (Repo 5.25% + 4.00% = 9.25%).`;
+            takeaway3 = `<strong>Reset Conversion Option:</strong> Under RBI rules, borrowers have the legal right to request a spread reset to match new customer rates by paying a small conversion fee (typically ₹1,000 to ₹5,000 + 18% GST).`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Submit a formal "Spread Conversion Request Letter" to your branch manager whenever your bank's published new customer rate drops 0.50% below your current rate.`;
+            break;
+
+        case "CERSAI_DEED_ENGINE":
+            guideTitle = `CERSAI Charge Clearance & Lost Property Deed Guide`;
+            guideSummary = `Searching for "${queryStr}" addresses post-closure delays in recovering original property title deeds and clearing mortgage charges.`;
+            takeaway1 = `<strong>Mandatory 30-Day RBI Mandate:</strong> Banks MUST return original title deeds and remove CERSAI lien charges within <strong>30 days</strong> of full loan settlement.`;
+            takeaway2 = `<strong>₹5,000/Day Delay Penalty:</strong> RBI rules mandate a penalty of <strong>₹5,000 per day</strong> paid directly to the borrower for every day of delay beyond 30 days.`;
+            takeaway3 = `<strong>Misplaced Documents Protocol:</strong> If the bank misplaces your original deeds, they must bear all costs for filing an FIR, publishing 2 national newspaper notices, and obtaining certified duplicate copies.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> File an immediate grievance on RBI CMS portal (cms.rbi.org.in) on Day 31 if your bank delays deed return or CERSAI clearance.`;
+            break;
+
+        case "MAX_GAIN_ENGINE":
+            guideTitle = `Home Loan Overdraft (Max Gain) Savings & Liquidity Guide`;
+            guideSummary = `Searching for "${queryStr}" explores how Overdraft Home Loans (e.g., SBI Max Gain, ICICI Money Saver) minimize interest costs.`;
+            takeaway1 = `<strong>Daily Average Interest Calculation:</strong> Surplus cash deposited into the connected OD account is offset daily against outstanding principal, slashing interest payable without locking cash.`;
+            takeaway2 = `<strong>100% Tax-Free Interest Savings:</strong> Savings generated through OD interest offset are effectively tax-free returns equivalent to your home loan interest rate (8.5% p.a.).`;
+            takeaway3 = `<strong>Complete Liquidity:</strong> Park emergency funds, annual bonuses, or business cash surplus in OD. Withdraw anytime via ATM/NetBanking with zero penalty.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Direct your monthly salary and savings into the Max Gain OD account to save thousands in interest every single month.`;
+            break;
+
+        case "PREPAYMENT_DRAFT_ENGINE":
+            guideTitle = `Branch Prepayment Request & EMI Reduction Guide`;
+            guideSummary = `When searching for "${queryStr}", borrowers hit red tape when asking their bank to reduce monthly EMI instead of loan tenure after making a lump-sum prepayment.`;
+            takeaway1 = `<strong>Bank Default Policy:</strong> Indian lenders (SBI, HDFC, ICICI, etc.) automatically default to reducing tenure on part-prepayment, keeping monthly EMI unchanged.`;
+            takeaway2 = `<strong>Branch Letter Mandate:</strong> To force the bank to reduce your <strong>monthly EMI</strong>, you MUST submit an official written <strong>Branch Prepayment Request Letter</strong> along with account details.`;
+            takeaway3 = `<strong>Zero Prepayment Charges:</strong> Under RBI guidelines, 0% foreclosure or part-prepayment penalty applies to individual floating-rate home loans.`;
+            actionTip = `📋 <strong>Action:</strong> Use the 1-click generator above to copy your customized Bank Branch Request Letter and submit it to your home branch.`;
+            break;
+
+        case "SANCTION_DISBURSED_ENGINE":
+            guideTitle = `Sanction Amount vs Net In-Hand Bank Disbursal Guide`;
+            guideSummary = `Searching for "${queryStr}" highlights discrepancies between the on-paper loan sanction limit and the actual net cash credited to your bank account.`;
+            takeaway1 = `<strong>Upfront Deductions:</strong> Lenders deduct processing fees, 18% GST, legal/valuation fees, MOD stamp duty, and property insurance directly from the first tranche disbursal.`;
+            takeaway2 = `<strong>Section 194-IA 1% TDS:</strong> For property purchases or loan disbursals ≥ ₹50 Lakhs, 1% TDS must be withheld upfront and deposited with the Income Tax Department.`;
+            takeaway3 = `<strong>Pre-EMI vs Full EMI:</strong> During construction-linked disbursals, borrowers pay Pre-EMI (simple interest on disbursed amount only) until full loan sanction is drawn.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Request an itemized "Disbursal Advice Slip" prior to tranche release to audit pre-deducted fee lines against your Sanction Letter.`;
+            break;
+
+        case "FEE_GST_ENGINE":
+            guideTitle = `Processing Fee & 18% GST Transparency Decoder`;
+            guideSummary = `Searching for "${queryStr}" addresses hidden upfront costs and mandatory GST taxes added to loan processing fees.`;
+            takeaway1 = `<strong>18% GST Statutory Rule:</strong> 18% GST applies to bank processing fees, legal/technical valuation fees, and admin charges (0% GST on EMI principal & interest).`;
+            takeaway2 = `<strong>MOD Stamp Duty Caps:</strong> Memorandum of Deposit (MOD) stamp duty ranges between 0.2% and 0.5% depending on state laws (Maharashtra capped at ₹15k max).`;
+            takeaway3 = `<strong>Fee Refund Policy:</strong> Bank processing fees are non-refundable even if the loan is cancelled post-sanction, but property valuation fees must be itemized.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Negotiate flat-fee processing charges during festive zero-processing-fee promotional campaigns.`;
+            break;
+
+        case "TAX_REGIME_ENGINE":
+            guideTitle = `FY 2025–26 Home Loan Tax Deductions & Regime Guide`;
+            guideSummary = `Searching for "${queryStr}" guides borrowers on maximizing tax deductions across Old vs New Tax Regimes.`;
+            takeaway1 = `<strong>FY 2025–26 Default New Regime:</strong> New Tax Regime offers a ₹75,000 Standard Deduction, but Section 24(b) interest deduction for self-occupied property is <strong>₹0</strong>.`;
+            takeaway2 = `<strong>Old Tax Regime Benefits:</strong> Old Regime allows up to <strong>₹2,00,000</strong> deduction under Sec 24(b) for interest paid + <strong>₹1,50,000</strong> under Sec 80C for principal repayment.`;
+            takeaway3 = `<strong>Let-Out Property Exception:</strong> For rented/let-out properties, full annual interest paid can be offset against rental income under both tax regimes.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Calculate taxable liability under both regimes annually before filing ITR; switch to Old Regime if annual interest > ₹1.5L.`;
+            break;
+
+        case "EEA80_ENGINE":
+            guideTitle = `Sec 80EEA Tax Deduction Window Status & Alternatives`;
+            guideSummary = `Searching for "${queryStr}" clarifies the operational timeline of additional home loan tax benefits under Section 80EEA.`;
+            takeaway1 = `<strong>Window Closed Status:</strong> Section 80EEA (extra ₹1.5L deduction for first-time buyers on property value ≤ ₹45L) <strong>expired on March 31, 2022</strong>. No new sanctions qualify.`;
+            takeaway2 = `<strong>Existing Sanction Claims:</strong> Loans sanctioned between April 1, 2019 and March 31, 2022 continue to qualify for Section 80EEA throughout their tenure under Old Regime.`;
+            takeaway3 = `<strong>Primary Alternative:</strong> Utilize full Section 24(b) ₹2,00,000 cap + Section 80C ₹1,50,000 cap under the Old Tax Regime.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Take joint home loans to claim combined ₹4,00,000 Section 24(b) interest benefit across co-borrowers.`;
+            break;
+
+        case "MULTI_PREPAYMENT_ENGINE":
+            guideTitle = `Annual Bonus Compounding Prepayment Guide`;
+            guideSummary = `Searching for "${queryStr}" demonstrates the exponential compounding interest savings achieved by making small annual lump-sum prepayments.`;
+            takeaway1 = `<strong>Compounding Multiplier:</strong> Prepaying just 5-10% of principal once every 12 months (e.g. ₹1 Lakh annual bonus) cuts a 20-year loan down to 12.4 years.`;
+            takeaway2 = `<strong>Front-Loaded Interest Cut:</strong> Prepayments made during Years 1-5 yield the highest interest savings because early EMIs consist of 75%+ interest component.`;
+            takeaway3 = `<strong>Zero Prepayment Fine:</strong> No penalty or lock-in applies for floating-rate home loans taken by individual borrowers.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Automate annual part-prepayments immediately upon receiving work appraisal bonuses or tax refunds.`;
+            break;
+
+        case "BT_ENGINE":
+            guideTitle = `Home Loan Balance Transfer (BT) Switching Cost Analysis`;
+            guideSummary = `Searching for "${queryStr}" calculates net financial savings when switching an existing home loan to a new bank offering lower interest rates.`;
+            takeaway1 = `<strong>Net Savings Calculation:</strong> BT is beneficial only if total interest saved over remaining tenure exceeds total switching costs (new processing fee + 18% GST + legal + MOD fees).`;
+            takeaway2 = `<strong>Minimum Rate Differential:</strong> A rate difference of at least <strong>0.50% p.a.</strong> with minimum 10 years remaining tenure is recommended for breakeven.`;
+            takeaway3 = `<strong>Negotiation Leverage:</strong> Show your new bank's sanction letter to your current bank; they will often match the lower rate via a simple spread reset fee without BT red tape!`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Use the net-savings calculator above to ensure breakeven occurs within 6 months of switching.`;
+            break;
+
+        case "RIGHTS_ENGINE":
+            guideTitle = `RBI Borrower Rights & Penalty Waiver Guide`;
+            guideSummary = `Searching for "${queryStr}" highlights borrower legal protections under RBI Fair Practice Code & Master Directions.`;
+            takeaway1 = `<strong>0% Foreclosure Fee Mandate:</strong> Banks cannot charge prepayment or foreclosure penalties on floating-rate home loans for individual co-borrowers.`;
+            takeaway2 = `<strong>30-Day Deed Release Rule:</strong> Lenders must release original title deeds within 30 days of loan payoff, or pay a ₹5,000/day fine to the borrower.`;
+            takeaway3 = `<strong>Forced Bundling Prohibition:</strong> Lenders CANNOT force borrowers to buy property or life insurance from partner insurers as a pre-condition for loan sanction.`;
+            actionTip = `📜 <strong>Action:</strong> Cite RBI Fair Practice Code to reject forced insurance bundling or illegal foreclosure fee demands.`;
+            break;
+
+        case "PRECON_ENGINE":
+            guideTitle = `Pre-Construction Interest Tax Claim Guide`;
+            guideSummary = `Searching for "${queryStr}" explains Section 24(b) rules for claiming interest paid during the construction phase of an under-construction property.`;
+            takeaway1 = `<strong>5 Equal Installments Rule:</strong> Total interest paid during construction before possession is aggregated and claimed in <strong>5 equal annual installments</strong>.`;
+            takeaway2 = `<strong>Possession Milestone:</strong> Pre-construction interest claims begin ONLY from the financial year in which construction is completed and possession is handed over.`;
+            takeaway3 = `<strong>Section 24(b) Ceiling:</strong> Combined pre-construction installment + current year interest claim is subject to the overall ₹2,00,000 annual cap under Old Tax Regime.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Obtain a detailed pre-construction interest statement from your lender upon taking property possession.`;
+            break;
+
+        case "RATE_SCENARIO_ENGINE":
+            guideTitle = `Rate Reset Shock & Repo-Linked Rate (RLLR) Guide`;
+            guideSummary = `Searching for "${queryStr}" simulates monthly EMI jumps and tenure extensions caused by benchmark repo rate hikes.`;
+            takeaway1 = `<strong>REPO Rate Benchmark:</strong> Floating rate home loans are linked to RBI's Repo Rate (5.25%). A 1.00% repo hike increases EMI by ~₹3,200/mo on a ₹50L loan.`;
+            takeaway2 = `<strong>EMI vs Tenure Hike:</strong> Banks automatically extend loan tenure on rate hikes. If tenure hits age 65-70 cap, monthly EMI increases automatically.`;
+            takeaway3 = `<strong>Fixed vs Floating Choice:</strong> Floating rates remain 1.5% - 2.0% cheaper than fixed rates over long 20-year cycles.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Increase monthly EMI voluntarily by 5% every year to absorb potential future rate shock hikes.`;
+            break;
+
+        case "JOINT_ENGINE":
+            guideTitle = `Joint Home Loan Tax Benefit Optimization Guide`;
+            guideSummary = `Searching for "${queryStr}" optimizes tax savings for co-borrowers and joint property owners.`;
+            takeaway1 = `<strong>Co-Owner + Co-Borrower Mandate:</strong> To claim tax benefits, an applicant MUST be both a registered co-owner of the property AND a co-borrower on the loan.`;
+            takeaway2 = `<strong>Double Tax Deduction:</strong> Each co-borrower can claim up to <strong>₹2,00,000 (Sec 24b)</strong> for interest + <strong>₹1,50,000 (Sec 80C)</strong> for principal (Total ₹7,00,000 combined cap!).`;
+            takeaway3 = `<strong>Payment Ratio Alignment:</strong> Tax benefits must be claimed in proportion to each co-borrower's contribution toward EMI payments from their respective bank accounts.`;
+            actionTip = `💡 <strong>Pro Tip:</strong> Structure EMI payments from separate bank accounts to maintain clean audit records for Income Tax filing.`;
+            break;
+
+        case "JOURNEY_ENGINE":
+            guideTitle = `End-to-End Home Loan Disbursal & Title Deed Lifecycle`;
+            guideSummary = `Searching for "${queryStr}" maps out the complete 6-phase journey of taking, servicing, and closing an Indian home loan.`;
+            takeaway1 = `<strong>Phase 1-3 (Application to MOD):</strong> Income verification, CIBIL check (>750), 30-year property title search, technical valuation, and MOD registration at Sub-Registrar.`;
+            takeaway2 = `<strong>Phase 4-5 (Disbursal & EMI):</strong> Stage-wise construction cheque release, Pre-EMI servicing, and full EMI auto-debit setup via NACH/ECS.`;
+            takeaway3 = `<strong>Phase 6 (Closure & Deed Return):</strong> Full repayment, NOC issuance, CERSAI lien de-registration, and original title deed recovery within 30 days.`;
+            actionTip = `🗺️ <strong>Action:</strong> Review the interactive 6-phase roadmap on the left to track your current loan stage.`;
+            break;
+
+        case "POST_CLOSURE_ENGINE":
+            guideTitle = `Post-Loan Closure 5-Step Checklist & CIBIL Recovery Guide`;
+            guideSummary = `Searching for "${queryStr}" outlines mandatory steps after paying off your loan to secure title and protect your credit score.`;
+            takeaway1 = `<strong>1. No Dues Certificate (NDC):</strong> Secure signed NDC stating zero outstanding balance and all un-cleared post-dated cheques destroyed.`;
+            takeaway2 = `<strong>2. Title Deed Retrieval (30 Days):</strong> Collect original sale deed & mother deed. Bank fine of ₹5,000/day applies for delays beyond 30 days.`;
+            takeaway3 = `<strong>3. CERSAI & Lien Removal:</strong> Confirm bank removes mortgage charge from CERSAI portal and Sub-Registrar office records.`;
+            takeaway4 = `<strong>4. CIBIL Bureau Update ("CLOSED" vs "SETTLED"):</strong> Ensure account is marked "CLOSED" (not "SETTLED"). "Settled" status drops credit score by 50+ points!`;
+            actionTip = `🏁 <strong>Action:</strong> Check off each of the 5 mandatory post-closure tasks in the interactive widget on the left.`;
+            break;
+
+        case "CHECKLIST_ENGINE":
+            guideTitle = `Borrower Profile Document Verification Guide`;
+            guideSummary = `Searching for "${queryStr}" lists mandatory documents required for home loan approval based on borrower category.`;
+            takeaway1 = `<strong>Salaried Borrowers:</strong> KYC (PAN/Aadhaar), last 3 months salary slips, 2 years Form 16, and 6 months salary account statement.`;
+            takeaway2 = `<strong>Self-Employed:</strong> KYC, 3 years audited P&L and Balance Sheet, 3 years ITR with computation of income, and 12 months business bank statement.`;
+            takeaway3 = `<strong>Property Documents:</strong> Allotment letter, title chain (30 years), approved building plan, builder NOC, and Encumbrance Certificate (EC).`;
+            actionTip = `📋 <strong>Action:</strong> Select your borrower profile from the dropdown to view the custom checklist.`;
+            break;
+
+        default:
+            guideTitle = `Home Loan Decision & Optimization Guide`;
+            guideSummary = `Searching for "${queryStr}" provides expert guidance regarding interest calculations, fee breakdowns, and statutory rules.`;
+            takeaway1 = `<strong>2026 RBI Policy Rate:</strong> Benchmark Repo Rate sits at <strong>5.25%</strong>. Floating rate loan resets should be evaluated against monthly EMI impact vs tenure expansion.`;
+            takeaway2 = `<strong>Fee & 18% GST Slabs:</strong> Processing fees attract <strong>18% GST</strong>. Always demand an itemized breakup of legal, valuation, and MOD stamp duty charges upfront.`;
+            takeaway3 = `<strong>Tax Regime Optimization:</strong> Evaluate switching between default New Regime and Old Regime (Sec 24b ₹2L interest + Sec 80C ₹1.5L principal benefits).`;
+            actionTip = `💡 <strong>Action:</strong> Use the interactive widget on the left to simulate loan scenarios.`;
+            break;
+    }
+
+    articleBox.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+                <h4 style="font-size: 14px; font-weight: 700; color: var(--accent-gold); margin: 0 0 4px 0;">${guideTitle}</h4>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">${guideSummary}</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-secondary);">
+                <div>${takeaway1}</div>
+                <div>${takeaway2}</div>
+                <div>${takeaway3}</div>
+                ${takeaway4 ? `<div>${takeaway4}</div>` : ''}
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 10px; border-radius: var(--radius-sm); font-size: 11.5px; color: #10b981; margin-top: 4px;">
+                ${actionTip}
+            </div>
+        </div>
+    `;
+}
+
+function launchSolutionStudio(gap) {
     const pageSubtitle = document.getElementById("page-subtitle");
     if (pageTitle) pageTitle.textContent = "Solution Studio";
     if (pageSubtitle) pageSubtitle.textContent = `Live customer solution generated for "${gap.query}"`;
@@ -2268,6 +2477,7 @@ function launchSolutionStudio(gap) {
     const formatLower = (gap.format || "").toLowerCase();
 
     if (formatLower.includes("foir") || formatLower.includes("affordability")) {
+        renderStudioSEOArticle(gap, "FOIR_ENGINE");
         // Engine 1: Salary Affordability & FOIR Eligibility Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2337,6 +2547,7 @@ function launchSolutionStudio(gap) {
         recalculateFOIR();
 
     } else if (formatLower.includes("spread") || formatLower.includes("repo-rate spread") || formatLower.includes("margin")) {
+        renderStudioSEOArticle(gap, "SPREAD_ENGINE");
         // Engine: Repo Rate Spread Adjustment & Hidden Margin Compare Tool
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2408,6 +2619,7 @@ function launchSolutionStudio(gap) {
         recalculateSpread();
 
     } else if (formatLower.includes("cersai") || formatLower.includes("deed") || formatLower.includes("document release") || formatLower.includes("misplaced")) {
+        renderStudioSEOArticle(gap, "CERSAI_DEED_ENGINE");
         // Engine: CERSAI Charge Clearance & Lost Deed Compensation Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2458,6 +2670,7 @@ function launchSolutionStudio(gap) {
         recalculateDeed();
 
     } else if (formatLower.includes("max gain") || formatLower.includes("overdraft") || formatLower.includes("offset")) {
+        renderStudioSEOArticle(gap, "MAX_GAIN_ENGINE");
         // Engine: SBI Max Gain / Overdraft Account Simulator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2526,6 +2739,7 @@ function launchSolutionStudio(gap) {
         recalculateOD();
 
     } else if (formatLower.includes("draft") || formatLower.includes("letter") || formatLower.includes("branch request") || formatLower.includes("emi-reduction") || formatLower.includes("request")) {
+        renderStudioSEOArticle(gap, "PREPAYMENT_DRAFT_ENGINE");
         // Engine: Prepayment EMI-Reduction & Branch Request Draft Generator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2685,6 +2899,7 @@ Date: ${todayStr}`;
         recalculateDraft();
 
     } else if (formatLower.includes("multi-prepayment") || formatLower.includes("part payment") || formatLower.includes("compounding") || formatLower.includes("annual prepayment")) {
+        renderStudioSEOArticle(gap, "MULTI_PREPAYMENT_ENGINE");
         // Engine 2: Multi-Prepayment Annual Savings Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2778,6 +2993,7 @@ Date: ${todayStr}`;
         recalculateMultiPrepay();
 
     } else if (formatLower.includes("payoff-strategy") || formatLower.includes("reduce home loan tenure") || formatLower.includes("prepayment") || formatLower.includes("prepay") || formatLower.includes("choice manager") || formatLower.includes("tenure vs emi") || formatLower.includes("emi-vs-tenure")) {
+        renderStudioSEOArticle(gap, "PAYOFF_STRATEGY_ENGINE");
         // Engine 3: Loan Payoff Strategy & Tenure Acceleration Engine
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -2867,7 +3083,8 @@ Date: ${todayStr}`;
 
         recalculatePayoff();
 
-    } else if (formatLower.includes("bt") || formatLower.includes("balance transfer")) {
+    } else if (formatLower.includes("bt") || formatLower.includes("balance transfer") || formatLower.includes("switching cost")) {
+        renderStudioSEOArticle(gap, "BT_ENGINE");
         // Engine 4: Balance Transfer Net-Savings Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3025,6 +3242,7 @@ Date: ${todayStr}`;
         checkEEA();
 
     } else if (formatLower.includes("5-instalment") || formatLower.includes("pre-construction") || formatLower.includes("pre construction")) {
+        renderStudioSEOArticle(gap, "PRECON_ENGINE");
         // Engine 6: Pre-Construction Interest 5-Instalment Claim Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3079,6 +3297,7 @@ Date: ${todayStr}`;
         recalculatePrecon();
 
     } else if (formatLower.includes("rate-scenario") || formatLower.includes("fixed vs floating")) {
+        renderStudioSEOArticle(gap, "RATE_SCENARIO_ENGINE");
         // Engine 7: Fixed vs Floating Rate Shock & Reset Simulator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3167,6 +3386,7 @@ Date: ${todayStr}`;
         recalculateRateShock();
 
     } else if (formatLower.includes("joint")) {
+        renderStudioSEOArticle(gap, "JOINT_ENGINE");
         // Engine 8: Joint Co-Owner Tax Benefit Optimizer
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3270,6 +3490,7 @@ Date: ${todayStr}`;
         `;
 
     } else if (formatLower.includes("journey") || formatLower.includes("step-by-step") || formatLower.includes("walkthrough") || formatLower.includes("roadmap") || formatLower.includes("hub") || formatLower.includes("a-to-z") || formatLower.includes("guidance")) {
+        renderStudioSEOArticle(gap, "JOURNEY_ENGINE");
         // Engine: Step-by-Step Home Loan Disbursal Roadmap
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -3307,6 +3528,7 @@ Date: ${todayStr}`;
         `;
 
     } else if (formatLower.includes("rights explainer") || formatLower.includes("foreclosure") || formatLower.includes("floating-rate waiver")) {
+        renderStudioSEOArticle(gap, "RIGHTS_ENGINE");
         // Engine 10: RBI Floating-Rate Foreclosure Rights Explainer
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -3329,6 +3551,7 @@ Date: ${todayStr}`;
         `;
 
     } else if (formatLower.includes("post-closure") || formatLower.includes("cibil") || formatLower.includes("closure checklist")) {
+        renderStudioSEOArticle(gap, "POST_CLOSURE_ENGINE");
         // Engine: Post-Closure 5-Step Checklist & CIBIL Impact Guide
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3371,6 +3594,7 @@ Date: ${todayStr}`;
         `;
 
     } else if (formatLower.includes("checklist")) {
+        renderStudioSEOArticle(gap, "CHECKLIST_ENGINE");
         // Engine 11: Borrower Document Checklist Generator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -3436,6 +3660,7 @@ Date: ${todayStr}`;
         renderChecklist();
 
     } else if (formatLower.includes("sanction") || formatLower.includes("disbursed")) {
+        renderStudioSEOArticle(gap, "SANCTION_DISBURSED_ENGINE");
         // Engine: Sanctioned vs Net In-Hand Disbursed Lumpsum Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3571,6 +3796,7 @@ Date: ${todayStr}`;
         recalculateDisbursed();
 
     } else if (formatLower.includes("fee") || formatLower.includes("gst") || formatLower.includes("cost") || formatLower.includes("charges")) {
+        renderStudioSEOArticle(gap, "FEE_GST_ENGINE");
         // Engine: All-In Processing Fee & 18% GST Breakdown Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3640,6 +3866,7 @@ Date: ${todayStr}`;
         recalculateFeeGST();
 
     } else if (formatLower.includes("regime") || formatLower.includes("tax")) {
+        renderStudioSEOArticle(gap, "TAX_REGIME_ENGINE");
         // Engine 12: Old vs New Tax Regime Comparator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -3731,6 +3958,7 @@ Date: ${todayStr}`;
         recalculateTax();
 
     } else {
+        renderStudioSEOArticle(gap, "DEFAULT");
         // Engine Default / 13: Advanced Multi-Scenario EMI Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
