@@ -121,6 +121,16 @@ document.addEventListener("DOMContentLoaded", () => {
     initScanner();
     initPayoffPlanner();
     
+    // Default pre-hydrate Solution Studio with top search gap
+    if (typeof searchIntentGaps !== "undefined" && searchIntentGaps.length > 0) {
+        const topGap = {
+            ...searchIntentGaps[0],
+            loan_type: searchIntentGaps[0].loan_type || searchIntentGaps[0].loanType || "Home Loan",
+            gapScore: searchIntentGaps[0].volume * (6 - searchIntentGaps[0].quality)
+        };
+        launchSolutionStudio(topGap);
+    }
+    
     // Set current date
     const dateOpts = { year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById("current-date").textContent = new Date().toLocaleDateString('en-US', dateOpts);
@@ -175,7 +185,8 @@ function initTabSwitching() {
         competitors: ["Competitor Gap Matrix", "Analysis of home loan features offered by main players in the Indian market."],
         search: ["Search Intent Gaps", "SEO keyword opportunities where existing content does not solve consumer doubts."],
         opportunities: ["Opportunity Scoring (RICE)", "Prioritisation index for home loan features based on Reach, Impact, Confidence, and Effort."],
-        payoff: ["Loan Payoff Planner", "Interactive acceleration strategies (Avalanche vs. Snowball) with prepayment compounding."]
+        payoff: ["Loan Payoff Planner", "Interactive acceleration strategies (Avalanche vs. Snowball) with prepayment compounding."],
+        "solution-studio": ["Solution Studio", "Live customer solution generator and interactive widget sandbox."]
     };
 
     menuButtons.forEach(btn => {
@@ -188,7 +199,8 @@ function initTabSwitching() {
             
             // Toggle active tab pane
             tabPanes.forEach(pane => pane.classList.remove("active"));
-            document.getElementById(`tab-${tabId}`).classList.add("active");
+            const targetPane = document.getElementById(`tab-${tabId}`);
+            if (targetPane) targetPane.classList.add("active");
             
             // Update titles
             if (titles[tabId]) {
@@ -199,6 +211,18 @@ function initTabSwitching() {
             // Specific tab initializations/animations
             if (tabId === "dashboard") {
                 animateCharts();
+            } else if (tabId === "solution-studio") {
+                if (typeof searchIntentGaps !== "undefined" && searchIntentGaps.length > 0) {
+                    const activeQuery = document.getElementById("studio-query-title");
+                    if (!activeQuery || !activeQuery.textContent || activeQuery.textContent.trim() === "") {
+                        const topGap = {
+                            ...searchIntentGaps[0],
+                            loan_type: searchIntentGaps[0].loan_type || searchIntentGaps[0].loanType || "Home Loan",
+                            gapScore: searchIntentGaps[0].volume * (6 - searchIntentGaps[0].quality)
+                        };
+                        launchSolutionStudio(topGap);
+                    }
+                }
             }
         });
     });
@@ -790,10 +814,11 @@ function initSearchGaps() {
         tableBody.innerHTML = "";
         
         // Map data, calculating Gap Score dynamically
-        const mappedGaps = searchIntentGaps.map(item => {
+        const mappedGaps = searchIntentGaps.map((item, originalIndex) => {
             const gapScore = item.volume * (6 - item.quality);
             return {
                 ...item,
+                origIndex: originalIndex,
                 loan_type: item.loan_type || item.loanType || "Home Loan",
                 gapScore: gapScore
             };
@@ -845,7 +870,7 @@ function initSearchGaps() {
         }
         
         filtered.forEach(item => {
-            const realIdx = searchIntentGaps.indexOf(item);
+            const realIdx = typeof item.origIndex === "number" ? item.origIndex : searchIntentGaps.indexOf(item);
             const tr = document.createElement("tr");
             
             // Format Quality score stars
@@ -893,11 +918,17 @@ function initSearchGaps() {
         });
 
         tableBody.querySelectorAll(".btn-launch-solution").forEach(btn => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const idx = parseInt(btn.getAttribute("data-index"));
                 if (idx >= 0 && idx < searchIntentGaps.length) {
-                    const gap = mappedGaps.find(g => searchIntentGaps.indexOf(g) === idx) || searchIntentGaps[idx];
-                    launchSolutionStudio(gap);
+                    const targetGap = mappedGaps.find(g => g.origIndex === idx) || {
+                        ...searchIntentGaps[idx],
+                        loan_type: searchIntentGaps[idx].loan_type || searchIntentGaps[idx].loanType || "Home Loan",
+                        gapScore: searchIntentGaps[idx].volume * (6 - searchIntentGaps[idx].quality)
+                    };
+                    launchSolutionStudio(targetGap);
                 }
             });
         });
