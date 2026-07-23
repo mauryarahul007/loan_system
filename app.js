@@ -1859,15 +1859,12 @@ function initScanner() {
                 });
 
                 // Sync keywords & re-classify sentiment
+                const queryThemes = new Set(["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"]);
                 syncSearchKeywordsFromLogs(newItems);
                 socialLog.forEach(item => {
                     let sentiment = classifySentiment(item.text);
                     if (sentiment === "Discussion" && item.theme !== "Other") {
-                        if (["Tax benefit confusion", "Balance transfer confusion", "Fixed vs floating doubt"].includes(item.theme)) {
-                            sentiment = "Query";
-                        } else if (["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"].includes(item.theme)) {
-                            sentiment = "Complaint";
-                        }
+                        sentiment = queryThemes.has(item.theme) ? "Query" : "Complaint";
                     }
                     item.sentiment = sentiment;
                 });
