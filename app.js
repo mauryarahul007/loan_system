@@ -2336,6 +2336,165 @@ function launchSolutionStudio(gap) {
 
         recalculateFOIR();
 
+    } else if (formatLower.includes("draft") || formatLower.includes("letter") || formatLower.includes("branch request") || formatLower.includes("emi-reduction") || formatLower.includes("request")) {
+        // Engine: Prepayment EMI-Reduction & Branch Request Draft Generator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>📝 Branch Prepayment Request Rule:</strong> Indian banks (SBI, HDFC, ICICI, etc.) automatically default to reducing tenure on part-prepayment. To reduce your <strong>monthly EMI</strong> instead, you MUST submit an official written <strong>Branch Prepayment Request Letter</strong>.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Current Outstanding Loan Principal (₹)</label>
+                        <input type="number" id="draft-principal" value="4000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Lump-Sum Prepayment Amount (₹)</label>
+                        <input type="number" id="draft-prepay" value="500000" step="50000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" id="draft-rate" value="8.5" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Remaining Tenure (Years)</label>
+                        <input type="number" id="draft-tenure" value="15" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 4px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">New Reduced Monthly EMI (Option A)</span>
+                        <span class="res-val" id="res-draft-new-emi" style="color: #10b981;">₹34,467 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-draft-emi-drop">Saves ₹4,924 / month in cash outflow</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-purple);">
+                        <span class="res-label">Alt: Tenure Drop (Option B - Default)</span>
+                        <span class="res-val" id="res-draft-new-tenure" style="color: var(--accent-purple);">11.8 Years</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-draft-tenure-saved">Saves 3.2 Years if EMI kept same</span>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; margin-top: 4px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>📄 Official Bank Branch Prepayment Request Draft Generator</span>
+                        <button id="btn-copy-draft" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b; padding: 4px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600;">📋 Copy Request Draft</button>
+                    </div>
+
+                    <div class="grid-two-col" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="studio-input-group">
+                            <label>Lender / Bank Name</label>
+                            <select id="draft-bank-name">
+                                <option value="State Bank of India (SBI)" selected>State Bank of India (SBI)</option>
+                                <option value="HDFC Bank Limited">HDFC Bank</option>
+                                <option value="ICICI Bank Limited">ICICI Bank</option>
+                                <option value="Axis Bank Limited">Axis Bank</option>
+                                <option value="Bank of Baroda">Bank of Baroda</option>
+                                <option value="Punjab National Bank">Punjab National Bank</option>
+                                <option value="Canara Bank">Canara Bank</option>
+                                <option value="LIC Housing Finance Ltd">LIC Housing Finance</option>
+                            </select>
+                        </div>
+                        <div class="studio-input-group">
+                            <label>Borrower Name & Account No.</label>
+                            <input type="text" id="draft-account-info" value="Rahul Sharma (A/C: HL-987654321)">
+                        </div>
+                    </div>
+
+                    <div style="background: #0d1117; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 12px; font-family: monospace; font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap;" id="draft-letter-preview"></div>
+                </div>
+            </div>
+        `;
+
+        function recalculateDraft() {
+            const P = parseFloat(document.getElementById("draft-principal").value) || 4000000;
+            const prepay = parseFloat(document.getElementById("draft-prepay").value) || 500000;
+            const rVal = parseFloat(document.getElementById("draft-rate").value) || 8.5;
+            const r = rVal / 12 / 100;
+            const origTenure = parseFloat(document.getElementById("draft-tenure").value) || 15;
+            const n = origTenure * 12;
+
+            const bankName = document.getElementById("draft-bank-name").value || "State Bank of India (SBI)";
+            const accountInfo = document.getElementById("draft-account-info").value || "Borrower (A/C: HL-XXXXXX)";
+
+            const origEmi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const newP = Math.max(0, P - prepay);
+            const newEmi = (newP * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const emiDrop = origEmi - newEmi;
+
+            let monthCount = n;
+            if (origEmi > newP * r) {
+                monthCount = Math.log(origEmi / (origEmi - newP * r)) / Math.log(1 + r);
+            }
+            const newYears = (monthCount / 12).toFixed(1);
+            const savedYears = (origTenure - (monthCount / 12)).toFixed(1);
+
+            document.getElementById("res-draft-new-emi").textContent = `₹${Math.round(newEmi).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-draft-emi-drop").textContent = `Saves ₹${Math.round(emiDrop).toLocaleString("en-IN")} / month in cash outflow`;
+
+            document.getElementById("res-draft-new-tenure").textContent = `${newYears} Years`;
+            document.getElementById("res-draft-tenure-saved").textContent = `Saves ${savedYears} Years (${Math.round((origTenure - newYears)*12)} months) if EMI kept same`;
+
+            const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const borrowerName = accountInfo.split('(')[0].trim() || "Borrower";
+
+            const letterText = `To,
+The Branch Manager,
+${bankName},
+Home Loan Branch.
+
+Subject: Request for Home Loan Part-Prepayment & Monthly EMI Reduction
+Borrower & Account: ${accountInfo}
+
+Respected Sir/Madam,
+
+I am holding a Home Loan account (${accountInfo}) with your branch. I wish to make a voluntary part-prepayment of ₹${prepay.toLocaleString("en-IN")} towards my home loan principal.
+
+As per my financial preference, I request you to APPLY THIS PART-PREPAYMENT TO REDUCE MY MONTHLY EMI OBLIGATION while keeping the remaining loan tenure constant at ${origTenure} years.
+
+Details of Part-Prepayment & EMI Adjustment:
+- Current Outstanding Principal: ₹${P.toLocaleString("en-IN")}
+- Lump-Sum Prepayment Amount: ₹${prepay.toLocaleString("en-IN")}
+- Revised Principal Balance: ₹${newP.toLocaleString("en-IN")}
+- Existing Monthly EMI: ₹${Math.round(origEmi).toLocaleString("en-IN")}/mo
+- Requested Revised Monthly EMI: ₹${Math.round(newEmi).toLocaleString("en-IN")}/mo (Monthly Savings: ₹${Math.round(emiDrop).toLocaleString("en-IN")}/mo)
+- RBI Mandate Compliance: 0% Foreclosure/Prepayment Charges (Floating Rate Loan)
+
+Kindly process this prepayment and issue me an updated loan amortization schedule reflecting the reduced monthly EMI.
+
+Thanking You,
+Yours Sincerely,
+${borrowerName}
+Date: ${todayStr}`;
+
+            document.getElementById("draft-letter-preview").textContent = letterText;
+        }
+
+        ["draft-principal", "draft-prepay", "draft-rate", "draft-tenure", "draft-bank-name", "draft-account-info"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener("input", recalculateDraft);
+                el.addEventListener("change", recalculateDraft);
+            }
+        });
+
+        const copyBtn = document.getElementById("btn-copy-draft");
+        if (copyBtn) {
+            copyBtn.addEventListener("click", () => {
+                const text = document.getElementById("draft-letter-preview").textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    copyBtn.textContent = "✓ Copied to Clipboard!";
+                    setTimeout(() => { copyBtn.textContent = "📋 Copy Request Draft"; }, 2000);
+                });
+            });
+        }
+
+        recalculateDraft();
+
     } else if (formatLower.includes("multi-prepayment") || formatLower.includes("part payment")) {
         // Engine 2: Multi-Prepayment Annual Savings Calculator
         widgetBox.innerHTML = `
