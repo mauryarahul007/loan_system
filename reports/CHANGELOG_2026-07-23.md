@@ -30,15 +30,26 @@ Summary of all features, enhancements, design updates, and security audits compl
 
 ### ⚡ Solution Studio & Click-to-Build Solution Generator
 - **Interactive Solution Launchers (`⚡ Proposed Solution Format →`)**: Transformed static proposed solution cells in the Search Intent Gaps table into 1-click solution launcher buttons.
-- **Dedicated Solution Studio Tab (`#tab-solution-studio`)**: Added an interactive Solution Studio view with context headers, live market parameters, and instant solution engine mounting.
-- **5 Built-in Interactive Customer Solution Engines**:
-  1. *EMI vs Tenure Prepayment Simulator* (with real interest savings calculation).
-  2. *All-In Fee & 18% GST Cost Calculator* (separating tax-exempt EMI interest from 18% GST processing fees).
-  3. *Regime-Aware Tax Comparator* (incorporating FY 2025-26 / 2026 default New Tax Regime slabs and ₹75k standard deduction).
-  4. *Borrower Document Checklist Generator* (profile-based for Salaried, Self-Employed, and NRI).
-  5. *RBI Policy & Foreclosure Rights Explainer* (0% foreclosure fee waiver & ₹5,000/day document delay compensation).
+- **Dedicated Solution Studio Tab (`#tab-solution-studio`)**: Added an interactive Solution Studio view with context headers, live 2026 market parameters, and instant solution engine mounting.
+- **15 Built-in Specialized Interactive Customer Solution Engines**:
+  1. *Salary Affordability & FOIR Eligibility Calculator* (50%/60% FOIR banking rules, net salary, existing EMIs).
+  2. *Annual Bonus Multi-Prepayment Savings Calculator* (recurring annual bonus compounding, years saved, total interest saved).
+  3. *Monthly EMI Top-Up Tenure Acceleration Engine* (extra monthly contribution savings & accelerated loan closure date).
+  4. *Balance Transfer Net-Savings Calculator* (current vs new ROI, MOD stamp duty, 18% GST processing fee, breakeven period).
+  5. *Section 80EEA Closed-Window Eligibility Checker* (stamp duty cap check, flagging 80EEA window closure).
+  6. *Pre-Construction Interest 5-Instalment Claim Calculator* (1/5th annual claim under Sec 24b post-possession).
+  7. *Fixed vs Floating Rate Reset Shock Simulator* (+0.5%, +1.0%, +2.0% RBI rate hike scenarios, EMI jump & tenure ballooning).
+  8. *Joint Co-Owner Tax Benefit Optimizer* (co-borrower double tax claim up to ₹4L Sec 24b + ₹3L Sec 80C).
+  9. *Step-by-Step Home Loan Disbursal Roadmap* (interactive 6-phase timeline from CIBIL check to Deed return).
+  10. *RBI Floating-Rate Foreclosure Rights Explainer* (0% foreclosure fee waiver & ₹5,000/day document delay compensation).
+  11. *Borrower Document Checklist Generator* (profile-based checklists for Salaried MNC, Self-Employed, and NRI).
+  12. *Regime-Aware Tax Comparator* (FY 2025-26 default New Tax Regime slabs vs Old Regime deductions).
+  13. *All-In Fee & 18% GST Cost Calculator* (separating tax-exempt EMI interest from 18% GST processing fees).
+  14. *EMI vs Tenure Prepayment Simulator* (Option A Tenure Reduction vs Option B EMI Reduction).
+  15. *Multi-Scenario Advanced EMI Calculator* (default multi-scenario EMI & fee optimization engine).
 - **2026 Live Market Parameters**: Integrated live 2026 Indian market parameters (Repo Rate 5.25%, 18% GST slab, FY 2025-26 default tax regime rules, RBI floating rate waiver).
-- **Customer Embed Code Generator**: Includes copyable HTML embed code snippets for deploying generated solution tools directly to customer web portals.
+- **Customer Embed Code Generator**: Includes copyable HTML embed code snippets with 1-click `📋 Copy Code` button for deploying generated solution tools directly to customer web portals.
+
 
 
 

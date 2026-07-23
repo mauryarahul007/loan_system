@@ -75,6 +75,8 @@ The repository features comprehensive documentation organized into the four quad
 
 ## ✨ Features
 
+- ⚡ **Click-to-Build Solution Studio**: Instant 1-click interactive solution generator converting Search Intent Gaps into live customer widgets (Salary FOIR calculator, Balance Transfer calculator, Prepayment simulator, Tax regime comparator, 80EEA checker, Pre-construction 5-instalment claim guide, Rate hike shock simulator, Joint co-owner tax optimizer, 6-phase loan roadmap, RBI foreclosure rights explainer, and Document checklist).
+- 🧹 **Database Cleaning & Line-Item Control**: Single row deletion (`🗑️`), Select All batch deletion, and backend DB purge API (`POST /api/delete-logs`).
 - 💰 **EMI & Amortisation Schedule**: Monthly principal & interest breakdown with schedule export.
 - 📉 **Dual Prepayment Simulator**: Simulates both **Tenure Reduction** (saving maximum interest) and **EMI Reduction** (maximizing monthly cash flow).
 - 📜 **State Stamp Duty & MOD Matrix**: Calculates stamp duty across Indian states (Maharashtra, Karnataka, Delhi, Tamil Nadu, Telangana, etc.) and MOD registration caps.
@@ -95,11 +97,10 @@ loan_system/
 │   ├── howto-calculate-all-in-loan-costs.md # Processing & stamp duty guide
 │   ├── reference-finance-api.md            # Technical API reference
 │   └── explanation-privacy-first.md        # Privacy architecture explanation
-├── diagrams/                               # Architecture Diagram Triplet
-│   ├── home-loan-architecture.mmd          # Mermaid source
-│   ├── home-loan-architecture.svg          # Vector graphic
-│   ├── home-loan-architecture.png          # High-resolution PNG
-│   └── home-loan-architecture.excalidraw   # Editable Excalidraw scene
+├── reports/                                # gstack Skill Audit Reports & Releases
+│   ├── CHANGELOG_2026-07-23.md            # Daily Changelog Report
+│   ├── qa_report.md                        # Automated QA Audit (51/51 tests pass)
+│   └── cso_security_audit_20260723.json   # CSO Infrastructure Security Audit
 ├── lib/
 │   └── finance/                            # Pure TypeScript Financial Engine
 │       ├── emi.ts                          # EMI & monthly schedule engine
@@ -109,12 +110,12 @@ loan_system/
 │       └── tax.ts                          # Tax regime comparison engine
 ├── config/
 │   └── taxRules.ts                         # Statutory tax caps & state stamp duty rates
-├── app.js                                  # Dashboard UI controller
-├── index.html                              # Responsive HTML5 interface
-├── style.css                               # Custom CSS styling with mobile queries
-├── server.py                               # Scrapling crawler backend & REST API
+├── app.js                                  # Dashboard UI controller & Solution Studio router
+├── index.html                              # Responsive HTML5 interface (#tab-solution-studio)
+├── style.css                               # Custom CSS styling & Executive Obsidian theme
+├── server.py                               # Scrapling crawler backend & DB deletion API
 ├── test_scanner.py                         # Automated test suite (TTHW < 2 min)
-├── PROJECT_CONTEXT.md                      # gstack review report & roadmap
+├── CHANGELOG.md                            # Release history & feature changelog
 ├── CLAUDE.md                               # Agent skill routing instructions
 └── README.md                               # Project documentation
 ```
