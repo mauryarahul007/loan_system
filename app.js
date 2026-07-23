@@ -3328,6 +3328,48 @@ Date: ${todayStr}`;
             </div>
         `;
 
+    } else if (formatLower.includes("post-closure") || formatLower.includes("cibil") || formatLower.includes("closure checklist")) {
+        // Engine: Post-Closure 5-Step Checklist & CIBIL Impact Guide
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>🏁 Post-Loan Closure Mandatory Checklist:</strong> Complete these 5 mandatory steps after paying off your home loan to secure your property title and protect your CIBIL credit score.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;" id="post-closure-steps">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <input type="checkbox" id="step-noc" checked style="margin-right: 8px;">
+                        <label for="step-noc" style="font-weight: 600; color: var(--text-primary); cursor: pointer;">1. No Dues Certificate (NDC / NOC)</label>
+                        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Obtain signed No Dues Certificate stating zero outstanding balance and all un-cleared post-dated cheques destroyed.</p>
+                    </div>
+
+                    <div class="studio-result-card" style="border-left: 3px solid #3b82f6;">
+                        <input type="checkbox" id="step-deed" checked style="margin-right: 8px;">
+                        <label for="step-deed" style="font-weight: 600; color: var(--text-primary); cursor: pointer;">2. Original Title Deed Retrieval (30-Day RBI Rule)</label>
+                        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Collect original sale deed, mother deed, builder NOCs. Mandatory bank fine of ₹5,000/day for delays beyond 30 days.</p>
+                    </div>
+
+                    <div class="studio-result-card" style="border-left: 3px solid #a855f7;">
+                        <input type="checkbox" id="step-cersai" checked style="margin-right: 8px;">
+                        <label for="step-cersai" style="font-weight: 600; color: var(--text-primary); cursor: pointer;">3. CERSAI Charge Removal & Sub-Registrar Lien Cancellation</label>
+                        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Verify bank removes mortgage lien charge from CERSAI portal and Sub-Registrar office record.</p>
+                    </div>
+
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <input type="checkbox" id="step-cibil" checked style="margin-right: 8px;">
+                        <label for="step-cibil" style="font-weight: 600; color: var(--text-primary); cursor: pointer;">4. CIBIL Bureau Account Status Update ("CLOSED" vs "SETTLED")</label>
+                        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Verify account status is marked as "CLOSED" (not "SETTLED" or "WRITTEN OFF") within 30-45 days. Settled status drops credit score by 50+ points!</p>
+                    </div>
+
+                    <div class="studio-result-card" style="border-left: 3px solid #ec4899;">
+                        <input type="checkbox" id="step-encumbrance" checked style="margin-right: 8px;">
+                        <label for="step-encumbrance" style="font-weight: 600; color: var(--text-primary); cursor: pointer;">5. Fresh Encumbrance Certificate (EC) Verification</label>
+                        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Apply for Nil Encumbrance Certificate (EC) at Sub-Registrar to prove property is 100% free of encumbrance.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
     } else if (formatLower.includes("checklist")) {
         // Engine 11: Borrower Document Checklist Generator
         widgetBox.innerHTML = `

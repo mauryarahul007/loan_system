@@ -2,7 +2,7 @@
 
 **Date**: July 24, 2026  
 **Project**: Indian Home Loan Intent & Solution Engine (`loan_system`)  
-**Status**: ✅ 100% Passed (24 / 24 Test Cases)  
+**Status**: ✅ 100% Passed (25 / 25 Test Cases)  
 **Execution Environment**: Local Headless DOM Simulation & Schema Assertion Runner  
 
 ---
@@ -17,8 +17,8 @@ A comprehensive, end-to-end automated QA test suite (`test_solutions_qa.py`) was
 
 | Metric | Result |
 | :--- | :--- |
-| **Total Test Cases Executed** | **24** |
-| **Passed Test Cases** | **24** |
+| **Total Test Cases Executed** | **25** |
+| **Passed Test Cases** | **25** |
 | **Failed Test Cases** | **0** |
 | **Pass Rate** | **100.0%** |
 | **Generic Fallback Rate** | **0.0%** |
@@ -53,6 +53,7 @@ A comprehensive, end-to-end automated QA test suite (`test_solutions_qa.py`) was
 | **TC-22** | `Compounding annual prepayment simulator` | `car loan poor calculators issues and rules` | Annual Bonus Multi-Prepayment Engine | `#multi-principal`, `#res-multi-years` | ✅ PASS |
 | **TC-23** | `Single A-to-Z hub` | `home loan info scattered across sites issues and rules` | Step-by-Step Disbursal Roadmap Engine | `Phase 1: Pre-Approval & Sanction`, `Phase 6` | ✅ PASS |
 | **TC-24** | `Prepayment choice manager / Tenure vs EMI simulator` | `car loan prepayment confusion issues and rules` | Prepayment Payoff Strategy Engine | `#payoff-principal`, `#res-payoff-years` | ✅ PASS |
+| **TC-25** | `Post-closure checklist & CIBIL score impact guide` | `home loan other issues and rules` | Post-Closure 5-Step Checklist & CIBIL Impact | `#step-noc`, `#step-deed`, `#step-cersai`, `#step-cibil` | ✅ PASS |
 
 ---
 

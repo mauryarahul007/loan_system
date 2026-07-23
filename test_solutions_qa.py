@@ -43,6 +43,7 @@ test_cases = [
     { "id": "TC-22", "format": "Compounding annual prepayment simulator", "expected_ids": ["multi-principal", "res-multi-years"] },
     { "id": "TC-23", "format": "Single A-to-Z hub", "expected_ids": ["Phase 1: Pre-Approval & Sanction", "Phase 6: Final Deed Return"] },
     { "id": "TC-24", "format": "Prepayment choice manager / Tenure vs EMI simulator", "expected_ids": ["payoff-principal", "res-payoff-years"] },
+    { "id": "TC-25", "format": "Post-closure checklist & CIBIL score impact guide", "expected_ids": ["step-noc", "step-deed", "step-cersai", "step-cibil"] },
 ]
 
 def simulate_format_matching(format_str):
@@ -76,6 +77,8 @@ def simulate_format_matching(format_str):
         return "JOURNEY_ENGINE"
     elif "rights" in format_lower or "waiver" in format_lower or "foreclosure" in format_lower:
         return "RIGHTS_ENGINE"
+    elif "post-closure" in format_lower or "cibil" in format_lower or "closure checklist" in format_lower:
+        return "POST_CLOSURE_ENGINE"
     elif "checklist" in format_lower or "profile" in format_lower:
         return "CHECKLIST_ENGINE"
     elif "sanction" in format_lower or "disbursed" in format_lower:
