@@ -2336,6 +2336,195 @@ function launchSolutionStudio(gap) {
 
         recalculateFOIR();
 
+    } else if (formatLower.includes("spread") || formatLower.includes("repo-rate spread") || formatLower.includes("margin")) {
+        // Engine: Repo Rate Spread Adjustment & Hidden Margin Compare Tool
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>📉 Banking Spread Arbitrage Trap:</strong> When RBI cuts repo rates (benchmark <strong>5.25%</strong>), Indian banks often quietly increase their <strong>bank spread / margin</strong> for existing borrowers so interest rates don't drop, while offering lower spreads to new customers.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Benchmark RBI Repo Rate (% p.a.)</label>
+                        <input type="number" id="spread-repo" value="5.25" step="0.25">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Your Current Interest Rate (% p.a.)</label>
+                        <input type="number" id="spread-curr-rate" value="9.25" step="0.1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>New Borrower Rate Offered by Bank (%)</label>
+                        <input type="number" id="spread-new-rate" value="8.35" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Current Outstanding Principal (₹)</label>
+                        <input type="number" id="spread-principal" value="5000000" step="100000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #f43f5e;">
+                        <span class="res-label">Hidden Excess Bank Spread Paid</span>
+                        <span class="res-val" id="res-spread-extra-pct" style="color: #f43f5e;">+ 0.90% Extra Spread</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-spread-comp">Your Spread: 4.00% vs New Customer Spread: 3.10%</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Monthly Savings after Spread Reset Request</span>
+                        <span class="res-val" id="res-spread-monthly-loss" style="color: #10b981;">₹3,750 / month</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-spread-reset-cost">Reset Fee: ₹1,000 + GST (Breakeven in 10 days!)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateSpread() {
+            const repo = parseFloat(document.getElementById("spread-repo").value) || 5.25;
+            const currRate = parseFloat(document.getElementById("spread-curr-rate").value) || 9.25;
+            const newRate = parseFloat(document.getElementById("spread-new-rate").value) || 8.35;
+            const P = parseFloat(document.getElementById("spread-principal").value) || 5000000;
+
+            const yourSpread = Math.max(0, currRate - repo);
+            const newSpread = Math.max(0, newRate - repo);
+            const extraSpread = Math.max(0, yourSpread - newSpread);
+
+            const monthlyInterestLoss = (P * (extraSpread / 100)) / 12;
+
+            document.getElementById("res-spread-extra-pct").textContent = `+ ${extraSpread.toFixed(2)}% Extra Spread`;
+            document.getElementById("res-spread-comp").textContent = `Your Spread: ${yourSpread.toFixed(2)}% vs New Customer Spread: ${newSpread.toFixed(2)}%`;
+
+            document.getElementById("res-spread-monthly-loss").textContent = `₹${Math.round(monthlyInterestLoss).toLocaleString("en-IN")} / month`;
+            document.getElementById("res-spread-reset-cost").textContent = `Pay bank ₹1,000 conversion fee + GST to reset spread (Breakeven: < 1 month)`;
+        }
+
+        ["spread-repo", "spread-curr-rate", "spread-new-rate", "spread-principal"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateSpread);
+        });
+
+        recalculateSpread();
+
+    } else if (formatLower.includes("cersai") || formatLower.includes("deed") || formatLower.includes("document release") || formatLower.includes("misplaced")) {
+        // Engine: CERSAI Charge Clearance & Lost Deed Compensation Calculator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>📜 Mandatory RBI Deed Release Compensation Rule:</strong> Banks MUST return original title deeds and remove CERSAI charge within <strong>30 days</strong> of loan closure. Delay beyond 30 days incurs a mandatory bank penalty of <strong>₹5,000 / day</strong> paid directly to the borrower.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Loan Closure / Full Repayment Date</label>
+                        <input type="date" id="deed-closure-date" value="2026-06-01">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Days Original Property Deed Retained / Delayed</label>
+                        <input type="number" id="deed-days-delayed" value="55" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Mandatory Bank Compensation Owed to You</span>
+                        <span class="res-val" id="res-deed-compensation" style="color: #10b981; font-size: 22px;">₹1,25,000 Owed</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-deed-days-over">25 Days Past 30-Day RBI Deadline (₹5,000/day)</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f59e0b;">
+                        <span class="res-label">Escalation Pathway</span>
+                        <span class="res-val" style="color: #f59e0b; font-size: 16px;">Level 3: RBI Ombudsman</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">File complaint at cms.rbi.org.in if unpaid</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateDeed() {
+            const totalDays = parseFloat(document.getElementById("deed-days-delayed").value) || 55;
+            const daysOver = Math.max(0, totalDays - 30);
+            const penalty = daysOver * 5000;
+
+            document.getElementById("res-deed-compensation").textContent = penalty > 0 ? `₹${penalty.toLocaleString("en-IN")} Owed` : `₹0 (Within 30-day grace period)`;
+            document.getElementById("res-deed-days-over").textContent = daysOver > 0 ? `${daysOver} Days Past 30-Day RBI Deadline (₹5,000/day fine)` : `${totalDays} days elapsed (Bank has ${30 - totalDays} days remaining)`;
+        }
+
+        ["deed-closure-date", "deed-days-delayed"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateDeed);
+        });
+
+        recalculateDeed();
+
+    } else if (formatLower.includes("max gain") || formatLower.includes("overdraft") || formatLower.includes("offset")) {
+        // Engine: SBI Max Gain / Overdraft Account Simulator
+        widgetBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>💡 Home Loan Overdraft (Max Gain) Benefit:</strong> Parking surplus funds (emergency fund, bonus, business cash) in your Home Loan Overdraft account reduces interest charged daily without locking your money.
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Home Loan Sanction Balance (₹)</label>
+                        <input type="number" id="od-loan-bal" value="5000000" step="100000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Surplus Cash Parked in Overdraft Account (₹)</label>
+                        <input type="number" id="od-surplus-parked" value="600000" step="50000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" id="od-rate" value="8.5" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Remaining Tenure (Years)</label>
+                        <input type="number" id="od-tenure" value="20" step="1">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
+                        <span class="res-label">Monthly Interest Saved</span>
+                        <span class="res-val" id="res-od-monthly-saved" style="color: #10b981;">₹4,250 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-od-effective-bal">Effective interest-bearing balance: ₹44,00,000</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-purple);">
+                        <span class="res-label">Total Lifetime OD Interest Saved</span>
+                        <span class="res-val" id="res-od-total-saved" style="color: var(--accent-purple);">₹10,20,000</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);">100% liquid funds (withdraw anytime)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        function recalculateOD() {
+            const P = parseFloat(document.getElementById("od-loan-bal").value) || 5000000;
+            const surplus = parseFloat(document.getElementById("od-surplus-parked").value) || 600000;
+            const rVal = parseFloat(document.getElementById("od-rate").value) || 8.5;
+            const r = rVal / 12 / 100;
+            const years = parseFloat(document.getElementById("od-tenure").value) || 20;
+
+            const effectiveBal = Math.max(0, P - surplus);
+            const monthlyInterestSaved = surplus * r;
+            const totalSaved = monthlyInterestSaved * 12 * years;
+
+            document.getElementById("res-od-monthly-saved").textContent = `₹${Math.round(monthlyInterestSaved).toLocaleString("en-IN")} / mo`;
+            document.getElementById("res-od-effective-bal").textContent = `Effective interest charged on ₹${effectiveBal.toLocaleString("en-IN")} instead of ₹${P.toLocaleString("en-IN")}`;
+            document.getElementById("res-od-total-saved").textContent = `₹${Math.round(totalSaved).toLocaleString("en-IN")}`;
+        }
+
+        ["od-loan-bal", "od-surplus-parked", "od-rate", "od-tenure"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", recalculateOD);
+        });
+
+        recalculateOD();
+
     } else if (formatLower.includes("draft") || formatLower.includes("letter") || formatLower.includes("branch request") || formatLower.includes("emi-reduction") || formatLower.includes("request")) {
         // Engine: Prepayment EMI-Reduction & Branch Request Draft Generator
         widgetBox.innerHTML = `
