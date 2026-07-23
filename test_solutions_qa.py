@@ -41,6 +41,7 @@ test_cases = [
     { "id": "TC-20", "format": "SBI Max Gain / Overdraft account simulator", "expected_ids": ["od-loan-bal", "od-surplus-parked", "res-od-monthly-saved"] },
     { "id": "TC-21", "format": "Advanced calculator", "expected_ids": ["calc-principal", "res-calc-emi"] },
     { "id": "TC-22", "format": "Compounding annual prepayment simulator", "expected_ids": ["multi-principal", "res-multi-years"] },
+    { "id": "TC-23", "format": "Single A-to-Z hub", "expected_ids": ["Phase 1: Pre-Approval & Sanction", "Phase 6: Final Deed Return"] },
 ]
 
 def simulate_format_matching(format_str):
@@ -70,7 +71,7 @@ def simulate_format_matching(format_str):
         return "RATE_SCENARIO_ENGINE"
     elif "joint" in format_lower or "joint-borrower" in format_lower:
         return "JOINT_ENGINE"
-    elif "journey" in format_lower or "step by step" in format_lower or "walkthrough" in format_lower:
+    elif "journey" in format_lower or "step by step" in format_lower or "walkthrough" in format_lower or "hub" in format_lower or "a-to-z" in format_lower or "guidance" in format_lower:
         return "JOURNEY_ENGINE"
     elif "rights" in format_lower or "waiver" in format_lower or "foreclosure" in format_lower:
         return "RIGHTS_ENGINE"

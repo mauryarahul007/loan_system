@@ -3269,7 +3269,7 @@ Date: ${todayStr}`;
             </div>
         `;
 
-    } else if (formatLower.includes("journey") || formatLower.includes("step-by-step") || formatLower.includes("walkthrough") || formatLower.includes("roadmap")) {
+    } else if (formatLower.includes("journey") || formatLower.includes("step-by-step") || formatLower.includes("walkthrough") || formatLower.includes("roadmap") || formatLower.includes("hub") || formatLower.includes("a-to-z") || formatLower.includes("guidance")) {
         // Engine: Step-by-Step Home Loan Disbursal Roadmap
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
