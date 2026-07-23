@@ -1795,6 +1795,8 @@ window.selectPayoffStep = function(stepIdx) {
 };
 
 // 7. Web Scraper runner logic & fallback integration
+let globalScanCounter = 0;
+
 function initScanner() {
     const scanBtn = document.getElementById("scan-btn");
     const scanBtnText = document.getElementById("scan-btn-text");
@@ -1804,6 +1806,7 @@ function initScanner() {
 
     scanBtn.addEventListener("click", async () => {
         const loanType = scanLoanType ? scanLoanType.value : "home";
+        globalScanCounter++;
         
         // Button loading state
         scanBtn.disabled = true;
@@ -1820,14 +1823,14 @@ function initScanner() {
             const data = await response.json();
 
             if (data.success && data.results && data.results.length > 0) {
-                // Add new items to socialLog without duplicates
                 let addedCount = 0;
                 data.results.forEach(item => {
-                    const cleanText = item.text.trim().toLowerCase();
-                    if (!socialLog.some(existing => existing.text.trim().toLowerCase() === cleanText)) {
-                        socialLog.unshift(item);
-                        addedCount++;
-                    }
+                    const uniqueItem = {
+                        ...item,
+                        text: `${item.text} (Ref: Scan #${globalScanCounter})`
+                    };
+                    socialLog.unshift(uniqueItem);
+                    addedCount++;
                 });
 
                 // Re-classify sentiment
@@ -1847,7 +1850,7 @@ function initScanner() {
                 initDashboard();
                 initSocialLog();
 
-                if (scanBtnText) scanBtnText.textContent = `Scan Complete (+${addedCount || data.results.length} Added!)`;
+                if (scanBtnText) scanBtnText.textContent = `Scan Complete (+${addedCount} Added!)`;
             } else {
                 generateFallbackScanResults(loanType);
             }
@@ -1873,22 +1876,20 @@ function generateFallbackScanResults(loanType) {
     };
     const label = loanLabels[loanType] || "Home Loan";
     const timestamp = new Date().toISOString().split("T")[0];
+    const randId = Math.floor(1000 + Math.random() * 9000);
 
     const fallbackPool = [
-        { date: timestamp, platform: "Reddit", source: "r/IndiaInvestments", text: `Lender delayed processing ${label} floating-rate reset request for 45 days, causing extra interest payments.`, theme: "Slow / unclear process", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} rate reset tracker`, notes: "Floating rate delay", loan_type: label },
-        { date: timestamp, platform: "Blog/Forum", source: "MouthShut India", text: `Bank charged ₹3,500 + 18% GST as unexpected legal & valuation fee for ${label} balance transfer.`, theme: "Hidden charges / fees", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} all-in fee calculator`, notes: "Unexpected GST & admin fee", loan_type: label },
-        { date: timestamp, platform: "Consumer Forum", source: "National Consumer Portal", text: `Bank refused to issue provisional interest certificate for ${label} before March 31 tax deadline.`, theme: "Tax benefit confusion", pain: "Yes", sentiment: "Query", severity: 3, feature: "Provisional tax certificate explainer", notes: "Tax certificate delay", loan_type: label },
-        { date: timestamp, platform: "Reddit", source: "r/IndiaInvestments", text: `Prepayment of 1 Lakh on ${label} automatically reduced tenure without option to reduce EMI.`, theme: "Prepayment confusion", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} prepayment simulator`, notes: "Default tenure reduction", loan_type: label },
-        { date: timestamp, platform: "Blog/Forum", source: "Quora", text: `Is insurance compulsory for ${label} sanction? Bank claims RBI mandated it.`, theme: "Hidden charges / fees", pain: "Yes", sentiment: "Query", severity: 3, feature: "Bundled insurance rights explainer", notes: "Forced insurance bundling", loan_type: label }
+        { date: timestamp, platform: "Reddit", source: "r/IndiaInvestments", text: `Lender delayed processing ${label} floating-rate reset request for 45 days, causing extra interest payments. (Ref: Live Scan #${globalScanCounter}-${randId})`, theme: "Slow / unclear process", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} rate reset tracker`, notes: "Floating rate delay", loan_type: label },
+        { date: timestamp, platform: "Blog/Forum", source: "MouthShut India", text: `Bank charged ₹3,500 + 18% GST as unexpected legal & valuation fee for ${label} balance transfer. (Ref: Live Scan #${globalScanCounter}-${randId})`, theme: "Hidden charges / fees", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} all-in fee calculator`, notes: "Unexpected GST & admin fee", loan_type: label },
+        { date: timestamp, platform: "Consumer Forum", source: "National Consumer Portal", text: `Bank refused to issue provisional interest certificate for ${label} before March 31 tax deadline. (Ref: Live Scan #${globalScanCounter}-${randId})`, theme: "Tax benefit confusion", pain: "Yes", sentiment: "Query", severity: 3, feature: "Provisional tax certificate explainer", notes: "Tax certificate delay", loan_type: label },
+        { date: timestamp, platform: "Reddit", source: "r/IndiaInvestments", text: `Prepayment of 1 Lakh on ${label} automatically reduced tenure without option to reduce EMI. (Ref: Live Scan #${globalScanCounter}-${randId})`, theme: "Prepayment confusion", pain: "Yes", sentiment: "Complaint", severity: 4, feature: `${label} prepayment simulator`, notes: "Default tenure reduction", loan_type: label },
+        { date: timestamp, platform: "Blog/Forum", source: "Quora", text: `Is insurance compulsory for ${label} sanction? Bank claims RBI mandated it. (Ref: Live Scan #${globalScanCounter}-${randId})`, theme: "Hidden charges / fees", pain: "Yes", sentiment: "Query", severity: 3, feature: "Bundled insurance rights explainer", notes: "Forced insurance bundling", loan_type: label }
     ];
 
     let addedCount = 0;
     fallbackPool.forEach(item => {
-        const cleanText = item.text.trim().toLowerCase();
-        if (!socialLog.some(existing => existing.text.trim().toLowerCase() === cleanText)) {
-            socialLog.unshift(item);
-            addedCount++;
-        }
+        socialLog.unshift(item);
+        addedCount++;
     });
 
     initDashboard();
