@@ -3009,21 +3009,46 @@ function launchSolutionStudio(gap) {
         renderChecklist();
 
     } else if (formatLower.includes("sanction") || formatLower.includes("disbursed")) {
-        // Engine: Sanctioned vs Disbursed Amount Tranche Calculator
+        // Engine: Sanctioned vs Net In-Hand Disbursed Lumpsum Calculator
         widgetBox.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
-                    <strong>📊 Tranche & Disbursal Banking Rule:</strong> Interest is charged ONLY on the <strong>disbursed amount</strong> (e.g. ₹20L initial tranche for under-construction/plot stage), NOT the total sanctioned loan limit (₹50L).
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-secondary);">
+                    <strong>🏦 On-Paper Sanction vs Net In-Hand Disbursal Rules:</strong> Shows the exact lumpsum amount credited to your bank account after deducting bank processing fees, 18% GST, legal/technical fees, MOD stamp duty, mandatory insurance, and Sec 194-IA 1% TDS.
                 </div>
 
                 <div class="grid-two-col" style="gap: 16px;">
                     <div class="studio-input-group">
-                        <label>Sanctioned Loan Limit (₹)</label>
+                        <label>On-Paper Sanctioned Loan Limit (₹)</label>
                         <input type="number" id="sanc-limit" value="5000000" step="100000">
                     </div>
                     <div class="studio-input-group">
-                        <label>Currently Disbursed Amount (₹)</label>
-                        <input type="number" id="disb-amount" value="2000000" step="100000">
+                        <label>Gross Tranche Disbursal Amount (₹)</label>
+                        <input type="number" id="disb-amount" value="5000000" step="100000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Processing Fee % (+ 18% GST)</label>
+                        <input type="number" id="disb-proc-pct" value="0.5" step="0.1">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Legal, Valuation & MOD Stamp Duty (₹)</label>
+                        <input type="number" id="disb-legal-mod" value="15000" step="1000">
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-input-group">
+                        <label>Bank Property/Loan Insurance Premium (Deducted) (₹)</label>
+                        <input type="number" id="disb-insurance" value="25000" step="5000">
+                    </div>
+                    <div class="studio-input-group">
+                        <label>Sec 194-IA Buyer TDS Withheld (1% if property > ₹50L)</label>
+                        <select id="disb-tds-select">
+                            <option value="1" selected>Yes - Withhold 1% TDS (₹50,000)</option>
+                            <option value="0">No - TDS Not Deducted at Source</option>
+                        </select>
                     </div>
                 </div>
 
@@ -3039,15 +3064,28 @@ function launchSolutionStudio(gap) {
                 </div>
 
                 <div class="grid-two-col" style="gap: 16px; margin-top: 8px;">
-                    <div class="studio-result-card" style="border-left: 3px solid #10b981;">
-                        <span class="res-label">Pre-EMI Monthly Interest (Disbursed)</span>
-                        <span class="res-val" id="res-disb-pre-emi" style="color: #10b981;">₹14,167 / mo</span>
-                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pct">Interest charged on 40% disbursed amount (₹20,00,000)</span>
+                    <div class="studio-result-card" style="border-left: 3px solid #10b981; background: rgba(16, 185, 129, 0.05);">
+                        <span class="res-label" style="font-weight: 700; color: #10b981;">💵 NET IN-HAND LUMPSUM IN BANK ACCOUNT</span>
+                        <span class="res-val" id="res-disb-net-inhand" style="color: #10b981; font-size: 24px; font-weight: 800;">₹48,80,500</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-net-note">Sanctioned ₹50L → Net ₹48,80,500 credited after fee & tax cuts</span>
+                    </div>
+                    <div class="studio-result-card" style="border-left: 3px solid #f43f5e;">
+                        <span class="res-label" style="font-weight: 700; color: #f43f5e;">💸 TOTAL UPFRONT BANK FEES & TAX CUTS</span>
+                        <span class="res-val" id="res-disb-total-deductions" style="color: #f43f5e; font-size: 22px; font-weight: 700;">₹1,19,500</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-fee-breakdown">Proc Fee ₹25k + GST ₹4.5k + MOD ₹15k + Ins ₹25k + TDS ₹50k</span>
+                    </div>
+                </div>
+
+                <div class="grid-two-col" style="gap: 16px;">
+                    <div class="studio-result-card" style="border-left: 3px solid var(--accent-purple);">
+                        <span class="res-label">Monthly Pre-EMI Interest (Disbursed)</span>
+                        <span class="res-val" id="res-disb-pre-emi" style="color: var(--accent-purple);">₹35,417 / mo</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pct">Interest on ₹50,00,000 gross disbursal</span>
                     </div>
                     <div class="studio-result-card" style="border-left: 3px solid var(--accent-blue);">
-                        <span class="res-label">Full Sanctioned EMI (Post-Possession)</span>
+                        <span class="res-label">Full Sanctioned EMI Payable</span>
                         <span class="res-val" id="res-disb-full-emi" style="color: var(--accent-blue);">₹43,391 / mo</span>
-                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pending">Undisbursed Sanction Balance: ₹30,00,000</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted);" id="res-disb-pending">Total Sanctioned Limit: ₹50,00,000</span>
                     </div>
                 </div>
             </div>
@@ -3055,29 +3093,52 @@ function launchSolutionStudio(gap) {
 
         function recalculateDisbursed() {
             const sanc = parseFloat(document.getElementById("sanc-limit").value) || 5000000;
-            const disb = parseFloat(document.getElementById("disb-amount").value) || 2000000;
+            const disb = parseFloat(document.getElementById("disb-amount").value) || 5000000;
+            const procPct = parseFloat(document.getElementById("disb-proc-pct").value) || 0.5;
+            const legalMod = parseFloat(document.getElementById("disb-legal-mod").value) || 15000;
+            const insurance = parseFloat(document.getElementById("disb-insurance").value) || 25000;
+            const useTds = document.getElementById("disb-tds-select").value === "1";
+
             const rVal = parseFloat(document.getElementById("disb-rate").value) || 8.5;
             const r = rVal / 12 / 100;
             const n = (parseFloat(document.getElementById("disb-tenure").value) || 20) * 12;
 
-            // Pre-EMI is simple monthly interest on disbursed amount
+            // Upfront Fee & Tax Calculations
+            const procFeeBase = (disb * procPct) / 100;
+            const gst18 = procFeeBase * 0.18;
+            const tdsAmount = useTds ? (disb * 0.01) : 0;
+
+            const totalDeductions = procFeeBase + gst18 + legalMod + insurance + tdsAmount;
+            const netInHand = Math.max(0, disb - totalDeductions);
+
+            // Monthly EMI calculations
             const preEmi = disb * r;
-
-            // Full EMI on sanctioned amount
             const fullEmi = (sanc * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-
             const disbPct = ((disb / sanc) * 100).toFixed(0);
             const pendingBal = Math.max(0, sanc - disb);
+
+            // Update UI elements
+            document.getElementById("res-disb-net-inhand").textContent = `₹${Math.round(netInHand).toLocaleString("en-IN")}`;
+            document.getElementById("res-disb-net-note").textContent = `Sanctioned ₹${sanc.toLocaleString("en-IN")} → Net ₹${Math.round(netInHand).toLocaleString("en-IN")} in bank (Cut: ₹${Math.round(totalDeductions).toLocaleString("en-IN")})`;
+
+            document.getElementById("res-disb-total-deductions").textContent = `₹${Math.round(totalDeductions).toLocaleString("en-IN")}`;
+
+            let breakdownText = `Proc Fee ₹${Math.round(procFeeBase).toLocaleString("en-IN")} + 18% GST ₹${Math.round(gst18).toLocaleString("en-IN")}`;
+            if (legalMod > 0) breakdownText += ` + MOD/Legal ₹${Math.round(legalMod).toLocaleString("en-IN")}`;
+            if (insurance > 0) breakdownText += ` + Ins ₹${Math.round(insurance).toLocaleString("en-IN")}`;
+            if (tdsAmount > 0) breakdownText += ` + 1% TDS ₹${Math.round(tdsAmount).toLocaleString("en-IN")}`;
+            document.getElementById("res-disb-fee-breakdown").textContent = breakdownText;
 
             document.getElementById("res-disb-pre-emi").textContent = `₹${Math.round(preEmi).toLocaleString("en-IN")} / mo`;
             document.getElementById("res-disb-pct").textContent = `Pre-EMI interest charged on ${disbPct}% disbursed (₹${disb.toLocaleString("en-IN")})`;
             document.getElementById("res-disb-full-emi").textContent = `₹${Math.round(fullEmi).toLocaleString("en-IN")} / mo`;
-            document.getElementById("res-disb-pending").textContent = `Undisbursed Sanction Limit: ₹${pendingBal.toLocaleString("en-IN")} (Save ₹${Math.round(fullEmi - preEmi).toLocaleString("en-IN")}/mo cashflow in Pre-EMI)`;
+            document.getElementById("res-disb-pending").textContent = pendingBal > 0 ? `Undisbursed Limit: ₹${pendingBal.toLocaleString("en-IN")}` : `Full loan sanctioned & disbursed on paper`;
         }
 
-        ["sanc-limit", "disb-amount", "disb-rate", "disb-tenure"].forEach(id => {
+        ["sanc-limit", "disb-amount", "disb-proc-pct", "disb-legal-mod", "disb-insurance", "disb-tds-select", "disb-rate", "disb-tenure"].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener("input", recalculateDisbursed);
+            if (el) el.addEventListener("change", recalculateDisbursed);
         });
 
         recalculateDisbursed();
