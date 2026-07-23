@@ -313,8 +313,42 @@ def adjust_text_for_loan_type(text, loan_type):
     adjusted = adjusted.replace("Home Loans", phrase.title() + "s")
     return adjusted
 
+def run_agent_reach_fetch(queries, existing_texts, phrase):
+    print("Initiating Tier 2: Agent-Reach Web Scraper Engine...")
+    results = []
+    try:
+        import subprocess
+        for q in queries:
+            try:
+                cmd = [sys.executable, "-m", "agent_reach", "search", q]
+                out = subprocess.check_output(cmd, timeout=8, stderr=subprocess.STDOUT, text=True)
+                if out:
+                    lines = [l.strip() for l in out.splitlines() if len(l.strip()) > 30]
+                    for line in lines[:3]:
+                        norm = line.strip().lower()
+                        if norm not in existing_texts:
+                            results.append({
+                                "date": "2026-07-23",
+                                "platform": "Blog/Forum",
+                                "source": "Agent-Reach Engine",
+                                "text": line[:200] + "..." if len(line) > 200 else line,
+                                "theme": "General complaint",
+                                "pain": "Yes",
+                                "sentiment": analyze_sentiment(line),
+                                "severity": 4,
+                                "feature": f"{phrase.title()} guidance tool",
+                                "notes": "[Tier 2: Agent-Reach] Web research engine query",
+                                "loan_type": phrase.title()
+                            })
+                            existing_texts.add(norm)
+            except Exception as sub_e:
+                print(f"Agent-Reach query '{q}' note: {sub_e}")
+    except Exception as e:
+        print(f"Agent-Reach fallback execution error: {e}")
+    return results
+
 def run_scrapling_scan(existing_texts, loan_type="home"):
-    print(f"Initiating Scrapling web scanner for loan type: {loan_type}...")
+    print(f"Initiating 3-Tier Multi-Scraper for loan type: {loan_type}...")
     scraped_results = []
     
     loan_phrases = {
@@ -333,13 +367,14 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
         f"{phrase} HDFC SBI ICICI Axis Piramal Canara bank complaint review India"
     ]
     
+    # Tier 1: Scrapling Fetcher
     try:
         from scrapling import Fetcher
         fetcher = Fetcher()
         
         for q in queries:
             url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(q)}"
-            print(f"Scraping query: {url}")
+            print(f"[Tier 1: Scrapling] Scraping query: {url}")
             response = fetcher.get(url)
             
             if response.status == 200:
@@ -408,14 +443,14 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
                                     sentiment = "Query"
                                 elif theme in ["Prepayment confusion", "Hidden charges / fees", "Foreclosure process", "Poor calculators", "Slow / unclear process"]:
                                     sentiment = "Complaint"
- 
+
                             competitor = extract_competitor(snippet)
-                            notes_str = f"Scraped from: {title[:40]}"
+                            notes_str = f"[Tier 1: Scrapling] Scraped from: {title[:40]}"
                             if competitor:
                                 notes_str = f"Competitor: {competitor}. {notes_str}"
- 
+
                             item = {
-                                "date": "2026-07-18",
+                                "date": "2026-07-23",
                                 "platform": platform,
                                 "source": source_domain,
                                 "text": snippet[:200] + "..." if len(snippet) > 200 else snippet,
@@ -431,10 +466,14 @@ def run_scrapling_scan(existing_texts, loan_type="home"):
                             if not any(x["text"].strip().lower() == normalized_txt for x in scraped_results):
                                 scraped_results.append(item)
                                 existing_texts.add(normalized_txt)
-            else:
-                print(f"Fetcher returned status {response.status} for query '{q}'")
     except Exception as e:
-        print(f"Error during Scrapling execution: {e}")
+        print(f"Tier 1 Scrapling error: {e}")
+
+    # Tier 2: Agent-Reach Fallback (if Tier 1 returned no results)
+    if len(scraped_results) == 0:
+        print("[Tier 1] Scrapling returned 0 results. Triggering Tier 2: Agent-Reach...")
+        reach_results = run_agent_reach_fetch(queries, existing_texts, phrase)
+        scraped_results.extend(reach_results)
  
     # Build the final output batch (strictly non-duplicate, aiming for at least 10 entries)
     final_results = []
